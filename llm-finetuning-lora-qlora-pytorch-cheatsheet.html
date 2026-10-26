@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=1150">
+<meta name="description" content="Free one-page LLM cheat sheet for PyTorch: build a tiny GPT, pretraining loop, tokenizers, small LLMs, generation, LoRA, QLoRA, PEFT, TRL SFT and GPU memory math. Printable PDF.">
+<link rel="canonical" href="https://arnabdeypolimi.github.io/pytorch-cheatsheets/llm-finetuning-lora-qlora-pytorch-cheatsheet.html">
+<meta property="og:title" content="LLM Fine-Tuning Cheat Sheet: LoRA, QLoRA, Tiny GPT in PyTorch (PDF)">
+<meta property="og:description" content="Free one-page LLM cheat sheet for PyTorch: build a tiny GPT, pretraining loop, tokenizers, small LLMs, generation, LoRA, QLoRA, PEFT, TRL SFT and GPU memory math. Printable PDF.">
+<meta property="og:image" content="https://arnabdeypolimi.github.io/pytorch-cheatsheets/images/llm-finetuning-lora-qlora-pytorch-cheatsheet.png">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<title>LLM Fine-Tuning Cheat Sheet: LoRA, QLoRA, Tiny GPT in PyTorch (PDF)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  :root {
+    --accent: #0d9488;
+    --accent-soft: #f6b5a5;
+    --accent-bg: #e7f6f4;
+    --ink: #222;
+    --muted: #555;
+    --rule: #cfcfcf;
+    --code-bg: #1e1e1e;
+    --code-fg: #e8e8e8;
+    --code-cm: #8a8a8a;
+    --code-kw: #ff7a5c;
+    --code-st: #f0b35a;
+    --code-ln: #6a6a6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    width: 297mm; height: 210mm; overflow: hidden; position: relative;
+    font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+    font-size: 6.8pt; line-height: 1.25; color: var(--ink);
+    padding: 6mm 7mm 0 7mm;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .deco { position: absolute; top: 0; right: 0; width: 100mm; height: 27mm; z-index: 0; }
+  header { position: relative; z-index: 1; border-bottom: 0.6pt solid var(--rule); width: 205mm; padding-bottom: 1.6mm; }
+  h1 { font-weight: 300; font-size: 27pt; letter-spacing: -0.5pt; line-height: 1; color: #333; }
+  h1 .cs { font-size: 19pt; letter-spacing: 1pt; color: #555; margin-left: 3mm; }
+  h1 .bolt { display: inline-block; width: 6mm; height: 8mm; vertical-align: -1mm; margin-left: 2mm; }
+  .steps { display: flex; gap: 9mm; margin-top: 2.2mm; font-size: 8pt; }
+  .steps span b { display: inline-block; width: 3.8mm; height: 3.8mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 6.2pt; text-align: center; line-height: 3.8mm; margin-right: 1.4mm; font-weight: 500; }
+
+  .grid { position: relative; z-index: 1; display: grid; grid-template-columns: 90mm 99mm 1fr; gap: 0 5mm; margin-top: 2mm; height: 170mm; }
+  .col { display: flex; flex-direction: column; gap: 1.6mm; }
+  .col + .col { border-left: 0.6pt solid var(--rule); padding-left: 4mm; }
+  h2 { font-weight: 300; font-size: 13.5pt; color: var(--accent); line-height: 1.05; margin-bottom: 1mm; }
+  h3 { font-weight: 400; font-size: 7.6pt; color: var(--accent); text-transform: uppercase; letter-spacing: 0.3pt; margin: 1mm 0 0.6mm; }
+  p { margin-bottom: 1mm; }
+  p.note { font-style: italic; color: var(--muted); font-size: 6.7pt; }
+  code, .k { font-weight: 700; font-family: inherit; }
+
+  table.kv { width: 100%; border-collapse: collapse; margin: 0.6mm 0 0.4mm; }
+  table.kv td { padding: 0.4mm 0; vertical-align: top; border-bottom: 0.4pt solid #ececec; }
+  table.kv tr:last-child td { border-bottom: none; }
+  table.kv td:first-child { font-weight: 700; padding-right: 2mm; white-space: nowrap; }
+  table.kv.quad td:nth-child(3) { font-weight: 700; padding-right: 2mm; padding-left: 2mm; white-space: nowrap; }
+  table.kv.wrap td:first-child { white-space: normal; width: 30%; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 3mm; }
+
+  pre.code {
+    background: var(--code-bg); color: var(--code-fg); border-radius: 1mm;
+    font-family: "Roboto Mono", Menlo, monospace; font-size: 5.6pt; line-height: 1.3;
+    padding: 1.4mm 2mm 1.4mm 1.2mm; white-space: pre; overflow: hidden;
+  }
+  pre.code .ln { color: var(--code-ln); display: inline-block; width: 3.4mm; text-align: right; margin-right: 1.8mm; user-select: none; }
+  pre.code .cm { color: var(--code-cm); }
+  pre.code .kw { color: var(--code-kw); }
+  pre.code .st { color: var(--code-st); }
+  pre.code .nb { color: #9cdcfe; }
+
+  .hook { display: grid; grid-template-columns: 7mm 1fr; gap: 0 2mm; align-items: start; margin-bottom: 1.2mm; }
+  .hook svg { width: 7mm; height: 5mm; }
+  .card { background: var(--accent-bg); border-radius: 1.5mm; padding: 1.6mm 2mm; }
+  .card .tag { float: right; width: 3.6mm; height: 3.6mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 6pt; text-align: center; line-height: 3.6mm; }
+
+  .flow { display: flex; align-items: center; gap: 1mm; font-size: 6.3pt; margin: 0.8mm 0 1mm; flex-wrap: wrap; }
+  .flow span { background: var(--accent-bg); border: 0.5pt solid var(--accent-soft); border-radius: 0.8mm; padding: 0.4mm 1.2mm; font-weight: 500; }
+  .flow i { color: var(--accent); font-style: normal; }
+
+  footer { position: absolute; left: 7mm; right: 7mm; bottom: 3.2mm; border-top: 0.6pt solid var(--rule); padding-top: 1.2mm; text-align: right; font-size: 6.5pt; color: #444; z-index: 1; }
+  footer span + span::before { content: "•"; margin: 0 2.5mm 0 4mm; }
+</style>
+
+<style id="theme">
+  :root {
+    --accent: #0d9488; --accent-soft: #93dcd2; --accent-bg: #e7f6f4; --accent-dark: #0f766e;
+    --ink: #1f2430; --muted: #5b6270; --rule: #e3e6ec; --band: #141824;
+    --code-bg: #f6f7fa; --code-fg: #1f2937; --code-cm: #8b94a3; --code-kw: #0f766e;
+    --code-st: #b45309; --code-ln: #b9bfca;
+  }
+  body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; padding-top: 0; letter-spacing: -0.05pt; }
+  .band { display: flex; align-items: center; gap: 3.5mm; margin: 0 -7mm; padding: 0 7mm; height: 17mm;
+          background: var(--band); color: #fff; border-bottom: 1.2mm solid var(--accent); width: auto; }
+  .band .logo { width: 10mm; height: 10mm; border-radius: 2.4mm; background: var(--accent); display: grid; place-items: center; flex: none; }
+  .band .logo svg { width: 7mm; height: 7mm; }
+  .band .title { flex: none; }
+  .band h1 { white-space: nowrap; font-weight: 800; font-size: 19pt; letter-spacing: -0.6pt; color: #fff; line-height: 1; }
+  .band .kicker { font-size: 6.4pt; font-weight: 600; letter-spacing: 1.6pt; text-transform: uppercase; color: var(--accent-soft); margin-top: 1.2mm; }
+  .band .kicker { white-space: nowrap; }
+  .band .kicker i { font-style: normal; letter-spacing: .2pt; text-transform: none; color: #c5cad6; font-weight: 400; }
+  .band .steps { margin: 0 0 0 auto; display: flex; gap: 1.6mm; font-size: 7pt; align-items: center; }
+  .band .steps span { background: rgba(255,255,255,.08); border: .5pt solid rgba(255,255,255,.18); border-radius: 4mm; padding: .9mm 2.4mm .9mm 1mm; color: #e9ecf2; }
+  .band .steps span b { background: var(--accent); color: #fff; width: 3.8mm; height: 3.8mm; line-height: 3.8mm; margin-right: 1.3mm; }
+  .band .steps i.arrow { color: var(--accent-soft); font-style: normal; font-size: 7pt; }
+  .grid { margin-top: 3.4mm; height: 176mm; }
+  .col + .col { border-left: none; padding-left: 0; }
+  h2 { font-family: "Inter", sans-serif; font-weight: 750; font-size: 11pt; color: var(--ink); letter-spacing: -0.3pt;
+       display: flex; align-items: center; gap: 1.6mm; margin-bottom: 1.2mm; }
+  h2::before { content: ""; width: 1.4mm; height: 3.6mm; border-radius: .5mm; background: var(--accent); flex: none; }
+  h3 { font-weight: 700; font-size: 6.4pt; letter-spacing: .8pt; color: var(--accent-dark); }
+  pre.code { background: var(--code-bg); color: var(--code-fg); border-radius: 0 1.4mm 1.4mm 0; border-left: 1mm solid var(--accent);
+             font-family: "JetBrains Mono", Menlo, monospace; box-shadow: inset 0 0 0 .4pt #e4e7ee; }
+  pre.code .nb { color: #2563eb; }
+  pre.code .kw { font-weight: 600; }
+  table.kv td { border-bottom: .4pt solid var(--rule); }
+  table.ft th { color: var(--accent-dark); border-bottom: .7pt solid var(--accent); font-weight: 700; font-size: 5.6pt; }
+  table.ft td { border-bottom: .4pt solid var(--rule); }
+  c { font-family: "JetBrains Mono", Menlo, monospace; background: var(--accent-bg); color: #1f2937; }
+  .flow span { background: var(--accent-bg); border-color: var(--accent-soft); border-radius: 3mm; }
+  .flow i { color: var(--accent); }
+  p.note { color: var(--muted); }
+  footer { border-top: .5pt solid var(--rule); display: flex; justify-content: space-between; color: var(--muted); }
+  footer span + span::before { content: none; }
+  footer b { color: var(--ink); font-weight: 700; }
+  footer .sep { color: var(--accent); margin: 0 1.6mm; }
+</style>
+<style></style></head><body>
+<header class="band">
+  <div class="logo"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="3" fill="#fff"/><path d="M7 16 L7 21 L12 16 Z" fill="#fff"/><rect x="6.5" y="7.5" width="8" height="1.8" rx=".9" fill="#0d9488"/><rect x="6.5" y="11" width="11" height="1.8" rx=".9" fill="#0d9488"/></svg></div>
+  <div class="title"><h1>LLMs with PyTorch</h1><div class="kicker">Cheat Sheet</div></div>
+  <div class="steps"><span><b>1</b>Tokenize</span><i class="arrow">›</i><span><b>2</b>Build or load a model</span><i class="arrow">›</i><span><b>3</b>Pretrain or finetune</span><i class="arrow">›</i><span><b>4</b>Generate &amp; evaluate</span></div>
+</header>
+
+<div class="grid">
+  <!-- ============ COLUMN 1 ============ -->
+  <div class="col">
+    <section>
+      <h2>General</h2>
+      <p>A GPT-style LLM is a <b>decoder-only Transformer</b> trained on <b>next-token prediction</b>: given tokens <b>t₁…tₙ</b>, predict <b>tₙ₊₁</b>. The loss is <b>cross-entropy</b> between the logits and the inputs <b>shifted by one</b>. Finetuning reuses the same loss on curated data.</p>
+      <table class="kv quad">
+        <tr><td>B</td><td>batch size</td><td>V</td><td>vocabulary size</td></tr>
+        <tr><td>T</td><td>sequence / context length</td><td>H</td><td>attention heads</td></tr>
+        <tr><td>d</td><td>model (embedding) dim</td><td>L</td><td>Transformer blocks</td></tr>
+      </table>
+      <p class="note">Params ≈ <b>12·L·d² + V·d</b>. Shapes flow as <b>[B, T] → [B, T, d] → [B, T, V]</b>.</p>
+    </section>
+
+    <section>
+      <h2>Building blocks</h2>
+      <div class="two">
+        <div>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="2" width="6" height="16" fill="#0d9488"/><rect x="11" y="6" width="15" height="3" fill="#93dcd2"/><rect x="11" y="11" width="15" height="3" fill="#93dcd2"/></svg>
+            <div><b>nn.Embedding(V, d)</b>: token id → vector (+ position)</div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 2 h24 v16 z" fill="#93dcd2"/><path d="M2 2 v16 h24" stroke="#0d9488" stroke-width="2" fill="none"/></svg>
+            <div><b>F.scaled_dot_product_attention</b>(q,k,v, <b>is_causal=True</b>): fused causal attention</div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 14 Q14 -4 26 14" stroke="#0d9488" stroke-width="2.4" fill="none"/><line x1="2" y1="17" x2="26" y2="17" stroke="#bbb"/></svg>
+            <div><b>nn.RMSNorm(d)</b>: cheaper LayerNorm, used <b>pre</b>-attention &amp; pre-MLP</div></div>
+        </div>
+        <div>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="7" width="5" height="6" fill="#0d9488"/><rect x="9" y="3" width="10" height="14" fill="#93dcd2"/><rect x="21" y="7" width="5" height="6" fill="#0d9488"/></svg>
+            <div><b>MLP / SwiGLU</b>: d → 4d → d, applied to each token</div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><circle cx="14" cy="10" r="7" fill="none" stroke="#0d9488" stroke-width="2"/><path d="M14 10 L20 6" stroke="#0d9488" stroke-width="2"/></svg>
+            <div><b>RoPE</b>: rotary position encoding on q &amp; k (Llama, Qwen)</div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><path d="M3 16 h22 M3 16 C3 2 25 2 25 16" stroke="#0d9488" stroke-width="2" fill="none"/></svg>
+            <div><b>Residual</b> <b>x + f(x)</b> around every sub-layer; <b>weight tying</b> head ↔ embedding</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Tokenize</h2>
+      <p>Text → sub-word ids with <b>BPE</b>. Always use the tokenizer and <b>chat template</b> that match the model.</p>
+<pre class="code" data-code>from transformers import AutoTokenizer
+tok = AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B")
+ids = tok("Hello world", return_tensors="pt").input_ids  # [1,T]
+msgs = [{"role": "user", "content": "Explain LoRA"}]
+prompt = tok.apply_chat_template(msgs, tokenize=False,
+                                 add_generation_prompt=True)
+tok.pad_token = tok.pad_token or tok.eos_token  # for batching</pre>
+    </section>
+
+    <section>
+      <h3>Small open models (Hugging Face IDs)</h3>
+      <table class="kv">
+        <tr><td>HuggingFaceTB/SmolLM2-135M</td><td>135M / 360M / 1.7B, great for laptops</td></tr>
+        <tr><td>Qwen/Qwen3-0.6B</td><td>0.6B / 1.7B / 4B, strong multilingual</td></tr>
+        <tr><td>google/gemma-3-270m</td><td>270M / 1B, built for task finetunes</td></tr>
+        <tr><td>meta-llama/Llama-3.2-1B</td><td>1B / 3B, gated (accept license)</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Generate</h2>
+<pre class="code" data-code>inputs = tok(prompt, return_tensors="pt").to(dev)
+out = model.generate(**inputs, max_new_tokens=200,
+                     do_sample=True, temperature=0.7, top_p=0.9)
+print(tok.decode(out[0], skip_special_tokens=True))</pre>
+      <table class="kv">
+        <tr><td>greedy / temperature</td><td>argmax, or logits / τ (&lt;1 sharper, &gt;1 more random)</td></tr>
+        <tr><td>top_k / top_p</td><td>sample only from the k best / p-mass tokens</td></tr>
+        <tr><td>KV cache</td><td>reuse past keys/values so each step is O(T)</td></tr>
+      </table>
+    </section>
+  </div>
+
+  <!-- ============ COLUMN 2 ============ -->
+  <div class="col">
+    <section>
+      <h2>Build a tiny GPT</h2>
+<pre class="code" data-code>import torch, torch.nn as nn, torch.nn.functional as F
+
+class Block(nn.Module):
+    def __init__(self, d, h):
+        super().__init__()
+        self.h, self.n1, self.n2 = h, nn.RMSNorm(d), nn.RMSNorm(d)
+        self.qkv = nn.Linear(d, 3 * d, bias=False)
+        self.proj = nn.Linear(d, d, bias=False)
+        self.mlp = nn.Sequential(nn.Linear(d, 4 * d), nn.GELU(),
+                                 nn.Linear(4 * d, d))
+    def forward(self, x):                        # x: [B, T, d]
+        B, T, C = x.shape
+        q, k, v = self.qkv(self.n1(x)).split(C, dim=-1)
+        q, k, v = (t.view(B, T, self.h, -1).transpose(1, 2)
+                   for t in (q, k, v))           # [B, h, T, d/h]
+        a = F.scaled_dot_product_attention(q, k, v, is_causal=True)
+        x = x + self.proj(a.transpose(1, 2).reshape(B, T, C))
+        return x + self.mlp(self.n2(x))
+class TinyGPT(nn.Module):
+    def __init__(self, V, d=384, h=6, L=6, T=256):
+        super().__init__()
+        self.tok, self.pos = nn.Embedding(V, d), nn.Embedding(T, d)
+        self.blocks = nn.Sequential(*(Block(d, h) for _ in range(L)))
+        self.norm = nn.RMSNorm(d)
+        self.head = nn.Linear(d, V, bias=False)
+        self.head.weight = self.tok.weight       # weight tying
+    def forward(self, idx, targets=None):        # idx: [B, T]
+        pos = torch.arange(idx.size(1), device=idx.device)
+        x = self.blocks(self.tok(idx) + self.pos(pos))
+        logits = self.head(self.norm(x))         # [B, T, V]
+        if targets is None: return logits, None
+        loss = F.cross_entropy(logits.flatten(0, 1),
+                               targets.flatten(), ignore_index=-100)
+        return logits, loss</pre>
+    </section>
+
+    <section>
+      <h2>Pretraining loop</h2>
+<pre class="code" data-code>data = torch.tensor(tok.encode(text))        # 1-D token stream
+def get_batch(B=32, T=256):
+    i = torch.randint(len(data) - T - 1, (B,))
+    x = torch.stack([data[j:j + T] for j in i])
+    y = torch.stack([data[j + 1:j + T + 1] for j in i])
+    return x.to(dev), y.to(dev)
+model = torch.compile(TinyGPT(V=len(tok)).to(dev))
+opt = torch.optim.AdamW(model.parameters(), lr=3e-4,
+                        betas=(0.9, 0.95), weight_decay=0.1)
+for step in range(5000):
+    x, y = get_batch()
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        _, loss = model(x, y)
+    loss.backward()
+    nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+    opt.step(); sched.step(); opt.zero_grad(set_to_none=True)</pre>
+      <p class="note"><b>y</b> is <b>x</b> shifted by one token. Use <b>warmup + cosine decay</b> for <b>sched</b>. Track <b>perplexity = exp(val loss)</b>; random-init loss ≈ <b>ln V</b>.</p>
+    </section>
+
+    <section>
+      <h3>Efficiency &amp; memory tricks</h3>
+      <table class="kv">
+        <tr><td>dtype=torch.bfloat16</td><td>Half the memory, no loss scaling (unlike fp16)</td></tr>
+        <tr><td>model.gradient_checkpointing_enable()</td><td>Less activation memory, ~30% slower</td></tr>
+        <tr><td>attn_implementation="sdpa"</td><td>Fused attention (or "flash_attention_2")</td></tr>
+        <tr><td>gradient_accumulation_steps=8</td><td>Large effective batch on a small GPU</td></tr>
+      </table>
+    </section>
+  </div>
+
+  <!-- ============ COLUMN 3 ============ -->
+  <div class="col">
+    <section>
+      <h2>Finetuning</h2>
+      <table class="kv wrap">
+        <tr><td>Full finetune</td><td>Update every weight: best quality, most memory</td></tr>
+        <tr><td>LoRA</td><td>Freeze W, learn low-rank ΔW = B·A (~0.1–1% params)</td></tr>
+        <tr><td>QLoRA</td><td>LoRA on a frozen <b>4-bit NF4</b> base model</td></tr>
+        <tr><td>DoRA</td><td>Magnitude + direction LoRA (<b>use_dora=True</b>)</td></tr>
+        <tr><td>SFT → DPO</td><td>Instruction-tune, then align on preference pairs</td></tr>
+      </table>
+      <h3>GPU memory per parameter (training)</h3>
+      <table class="kv">
+        <tr><td>Full FT, AdamW</td><td>~16 B: weights, grads, fp32 copy, Adam m &amp; v</td></tr>
+        <tr><td>LoRA, bf16 base</td><td>~2 B + adapters + activations</td></tr>
+        <tr><td>QLoRA, 4-bit base</td><td>~0.5–0.7 B: a 7B model fits in ~6 GB</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>LoRA</h2>
+      <p><b>h = W·x + (α/r)·B·A·x</b>, A: r×k, B: d×r, r ≪ d. <b>B starts at 0</b>, so step 0 equals the base model.</p>
+<pre class="code" data-code>class LoRALinear(nn.Module):
+    def __init__(self, base, r=8, alpha=16):
+        super().__init__()
+        self.base = base.requires_grad_(False)   # freeze W
+        self.A = nn.Linear(base.in_features, r, bias=False)
+        self.B = nn.Linear(r, base.out_features, bias=False)
+        nn.init.zeros_(self.B.weight)            # dW = 0 at start
+        self.s = alpha / r
+    def forward(self, x):
+        return self.base(x) + self.s * self.B(self.A(x))
+from peft import LoraConfig, get_peft_model   # with PEFT
+cfg = LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05,
+        target_modules="all-linear", task_type="CAUSAL_LM")
+model = get_peft_model(model, cfg)
+model.print_trainable_parameters()</pre>
+      <p class="note">Typical: <b>r 8–64</b>, <b>α = r or 2r</b>, <b>lr 1e-4–2e-4</b> (≈10× full-FT lr).</p>
+    </section>
+
+    <section>
+      <h2>QLoRA</h2>
+<pre class="code" data-code>from transformers import AutoModelForCausalLM
+from transformers import BitsAndBytesConfig as BnB
+from peft import prepare_model_for_kbit_training
+bnb = BnB(load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",          # NormalFloat4
+    bnb_4bit_use_double_quant=True,     # quantize scales too
+    bnb_4bit_compute_dtype=torch.bfloat16)
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen3-0.6B",
+    quantization_config=bnb, device_map="auto")
+model = prepare_model_for_kbit_training(model)
+model = get_peft_model(model, cfg)      # same LoRA config</pre>
+    </section>
+
+    <section>
+      <h3>SFT, save &amp; merge</h3>
+      <table class="kv">
+        <tr><td>labels = -100</td><td>Mask prompt tokens: loss on answers only</td></tr>
+        <tr><td>trl.SFTTrainer</td><td>Chat data + <b>peft_config</b>, packing, bf16</td></tr>
+        <tr><td>model.save_pretrained()</td><td>Saves the adapter only (a few MB)</td></tr>
+        <tr><td>model.merge_and_unload()</td><td>Fold BA into W (merge on a bf16 base)</td></tr>
+      </table>
+    </section>
+  </div>
+</div>
+
+<footer><span><b>LLM Fine-Tuning with PyTorch Cheat Sheet</b><span class="sep">/</span>PyTorch 2.x · transformers · peft · trl</span><span>github.com/arnabdeypolimi/pytorch-cheatsheets<span class="sep">/</span>CC BY 4.0<span class="sep">/</span>v1.0 · 10/2026</span></footer>
+
+<script>
+  const KW = new Set(["class","def","return","import","from","as","for","in","with","if","else","True","False","None","super","lambda","and","or","not"]);
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const tok = /(#.*$)|("[^"]*"|'[^']*')|(\b[A-Za-z_]\w*\b)|([^#"'A-Za-z_]+)/gm;
+  document.querySelectorAll("pre[data-code]").forEach(pre => {
+    const lines = pre.textContent.split("\n");
+    pre.innerHTML = lines.map((line, i) => {
+      let out = "";
+      line.replace(tok, (m, cm, st, id, other) => {
+        if (cm) out += `<span class="cm">${esc(cm)}</span>`;
+        else if (st) out += `<span class="st">${esc(st)}</span>`;
+        else if (id) out += KW.has(id) ? `<span class="kw">${id}</span>` : (id === "self" ? `<span class="nb">self</span>` : id);
+        else out += esc(other);
+        return m;
+      });
+      return `<span class="ln">${i + 1}</span>${out}`;
+    }).join("\n");
+  });
+</script>
+
+</body></html>

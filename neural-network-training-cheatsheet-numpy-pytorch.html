@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=1150">
+<meta name="description" content="Free one-page deep learning cheat sheet with formulas plus NumPy and PyTorch code for activation functions, loss functions, optimizers (SGD, Adam, AdamW), LR schedules, metrics, initialization and backprop from scratch.">
+<link rel="canonical" href="https://arnabdeypolimi.github.io/pytorch-cheatsheets/neural-network-training-cheatsheet-numpy-pytorch.html">
+<meta property="og:title" content="Neural Network Training Cheat Sheet: Activations, Losses, Optimizers, Metrics (NumPy & PyTorch)">
+<meta property="og:description" content="Free one-page deep learning cheat sheet with formulas plus NumPy and PyTorch code for activation functions, loss functions, optimizers (SGD, Adam, AdamW), LR schedules, metrics, initialization and backprop from scratch.">
+<meta property="og:image" content="https://arnabdeypolimi.github.io/pytorch-cheatsheets/images/neural-network-training-cheatsheet-numpy-pytorch.png">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<title>Neural Network Training Cheat Sheet: Activations, Losses, Optimizers, Metrics (NumPy & PyTorch)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  :root {
+    --accent: #2563eb;
+    --accent-soft: #f6b5a5;
+    --accent-bg: #eaf0fd;
+    --ink: #222;
+    --muted: #555;
+    --rule: #cfcfcf;
+    --code-bg: #1e1e1e;
+    --code-fg: #e8e8e8;
+    --code-cm: #8a8a8a;
+    --code-kw: #ff7a5c;
+    --code-st: #f0b35a;
+    --code-ln: #6a6a6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    width: 297mm; height: 210mm; overflow: hidden; position: relative;
+    font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+    font-size: 6.6pt; line-height: 1.25; color: var(--ink);
+    padding: 6mm 7mm 0 7mm;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .deco { position: absolute; top: 0; right: 0; width: 100mm; height: 27mm; z-index: 0; }
+  header { position: relative; z-index: 1; border-bottom: 0.6pt solid var(--rule); width: 205mm; padding-bottom: 1.6mm; }
+  h1 { font-weight: 300; font-size: 27pt; letter-spacing: -0.5pt; line-height: 1; color: #333; }
+  h1 .cs { font-size: 19pt; letter-spacing: 1pt; color: #555; margin-left: 3mm; }
+  h1 .bolt { display: inline-block; width: 6mm; height: 8mm; vertical-align: -1mm; margin-left: 2mm; }
+  .steps { display: flex; gap: 9mm; margin-top: 2.2mm; font-size: 8pt; }
+  .steps span b { display: inline-block; width: 3.8mm; height: 3.8mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 6.2pt; text-align: center; line-height: 3.8mm; margin-right: 1.4mm; font-weight: 500; }
+
+  .grid { position: relative; z-index: 1; display: grid; grid-template-columns: 96mm 96mm 1fr; gap: 0 5mm; margin-top: 2mm; height: 170mm; }
+  .col { display: flex; flex-direction: column; gap: 1.5mm; }
+  .col + .col { border-left: 0.6pt solid var(--rule); padding-left: 4mm; }
+  h2 { font-weight: 300; font-size: 13.5pt; color: var(--accent); line-height: 1.05; margin-bottom: 1mm; }
+  h3 { font-weight: 400; font-size: 7.6pt; color: var(--accent); text-transform: uppercase; letter-spacing: 0.3pt; margin: 1mm 0 0.6mm; }
+  p { margin-bottom: 1mm; }
+  p.note { font-style: italic; color: var(--muted); font-size: 6.7pt; }
+  code, .k { font-weight: 700; font-family: inherit; }
+
+  table.kv { width: 100%; border-collapse: collapse; margin: 0.6mm 0 0.4mm; }
+  table.kv td { padding: 0.4mm 0; vertical-align: top; border-bottom: 0.4pt solid #ececec; }
+  table.kv tr:last-child td { border-bottom: none; }
+  table.kv td:first-child { font-weight: 700; padding-right: 2mm; white-space: nowrap; }
+  table.kv.quad td:nth-child(3) { font-weight: 700; padding-right: 2mm; padding-left: 2mm; white-space: nowrap; }
+  table.kv.wrap td:first-child { white-space: normal; width: 42%; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 3mm; }
+
+  pre.code {
+    background: var(--code-bg); color: var(--code-fg); border-radius: 1mm;
+    font-family: "Roboto Mono", Menlo, monospace; font-size: 5.5pt; line-height: 1.3;
+    padding: 1.4mm 2mm 1.4mm 1.2mm; white-space: pre; overflow: hidden;
+  }
+  pre.code .ln { color: var(--code-ln); display: inline-block; width: 3.4mm; text-align: right; margin-right: 1.8mm; user-select: none; }
+  pre.code .cm { color: var(--code-cm); }
+  pre.code .kw { color: var(--code-kw); }
+  pre.code .st { color: var(--code-st); }
+  pre.code .nb { color: #9cdcfe; }
+
+  .hook { display: grid; grid-template-columns: 7mm 1fr; gap: 0 2mm; align-items: start; margin-bottom: 1.2mm; }
+  .hook svg { width: 7mm; height: 5mm; }
+  .card { background: var(--accent-bg); border-radius: 1.5mm; padding: 1.6mm 2mm; }
+  .card .tag { float: right; width: 3.6mm; height: 3.6mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 6pt; text-align: center; line-height: 3.6mm; }
+
+  .flow { display: flex; align-items: center; gap: 1mm; font-size: 6.3pt; margin: 0.8mm 0 1mm; flex-wrap: wrap; }
+  .flow span { background: var(--accent-bg); border: 0.5pt solid var(--accent-soft); border-radius: 0.8mm; padding: 0.4mm 1.2mm; font-weight: 500; }
+  .flow i { color: var(--accent); font-style: normal; }
+
+  footer { position: absolute; left: 7mm; right: 7mm; bottom: 3.2mm; border-top: 0.6pt solid var(--rule); padding-top: 1.2mm; text-align: right; font-size: 6.5pt; color: #444; z-index: 1; }
+  footer span + span::before { content: "•"; margin: 0 2.5mm 0 4mm; }
+</style>
+
+<style>
+  table.ft { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0.4mm 0 0.6mm; }
+  table.ft th { text-align: left; font-weight: 500; font-size: 5.9pt; color: var(--accent); text-transform: uppercase; letter-spacing: .2pt; padding: 0 1.2mm .5mm 0; border-bottom: .6pt solid var(--accent-soft); }
+  table.ft td { vertical-align: top; padding: .55mm 1.2mm .55mm 0; border-bottom: .4pt solid #ececec; }
+  table.ft tr:last-child td { border-bottom: none; }
+  table.ft td:first-child { font-weight: 700; }
+  td.m { font-family: "STIX Two Text", "Times New Roman", serif; font-size: 7pt; line-height: 1.22; }
+  td.m br + * , td.m { color: var(--ink); }
+  c { font-family: "Roboto Mono", Menlo, monospace; font-size: 5.2pt; line-height: 1.3; white-space: pre; background: #f4f1ef; border-radius: .6mm; padding: .1mm .6mm; display: inline-block; color: #2a2a2a; }
+  .small { font-size: 5.6pt; color: var(--muted); }
+  .steps .sub { margin-left: auto; color: var(--muted); font-size: 6.6pt; padding-top: .6mm; }
+  header .steps { width: 100%; }
+</style>
+<style id="theme">
+  :root {
+    --accent: #2563eb; --accent-soft: #a9c1f7; --accent-bg: #eaf0fd; --accent-dark: #1d4ed8;
+    --ink: #1f2430; --muted: #5b6270; --rule: #e3e6ec; --band: #141824;
+    --code-bg: #f6f7fa; --code-fg: #1f2937; --code-cm: #8b94a3; --code-kw: #1d4ed8;
+    --code-st: #b45309; --code-ln: #b9bfca;
+  }
+  body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; padding-top: 0; letter-spacing: -0.05pt; }
+  .band { display: flex; align-items: center; gap: 3.5mm; margin: 0 -7mm; padding: 0 7mm; height: 17mm;
+          background: var(--band); color: #fff; border-bottom: 1.2mm solid var(--accent); width: auto; }
+  .band .logo { width: 10mm; height: 10mm; border-radius: 2.4mm; background: var(--accent); display: grid; place-items: center; flex: none; }
+  .band .logo svg { width: 7mm; height: 7mm; }
+  .band .title { flex: none; }
+  .band h1 { white-space: nowrap; font-weight: 800; font-size: 19pt; letter-spacing: -0.6pt; color: #fff; line-height: 1; }
+  .band .kicker { font-size: 6.4pt; font-weight: 600; letter-spacing: 1.6pt; text-transform: uppercase; color: var(--accent-soft); margin-top: 1.2mm; }
+  .band .kicker { white-space: nowrap; }
+  .band .kicker i { font-style: normal; letter-spacing: .2pt; text-transform: none; color: #c5cad6; font-weight: 400; }
+  .band .steps { margin: 0 0 0 auto; display: flex; gap: 1.6mm; font-size: 7pt; align-items: center; }
+  .band .steps span { background: rgba(255,255,255,.08); border: .5pt solid rgba(255,255,255,.18); border-radius: 4mm; padding: .9mm 2.4mm .9mm 1mm; color: #e9ecf2; }
+  .band .steps span b { background: var(--accent); color: #fff; width: 3.8mm; height: 3.8mm; line-height: 3.8mm; margin-right: 1.3mm; }
+  .band .steps i.arrow { color: var(--accent-soft); font-style: normal; font-size: 7pt; }
+  .grid { margin-top: 3.4mm; height: 176mm; }
+  .col + .col { border-left: none; padding-left: 0; }
+  h2 { font-family: "Inter", sans-serif; font-weight: 750; font-size: 11pt; color: var(--ink); letter-spacing: -0.3pt;
+       display: flex; align-items: center; gap: 1.6mm; margin-bottom: 1.2mm; }
+  h2::before { content: ""; width: 1.4mm; height: 3.6mm; border-radius: .5mm; background: var(--accent); flex: none; }
+  h3 { font-weight: 700; font-size: 6.4pt; letter-spacing: .8pt; color: var(--accent-dark); }
+  pre.code { background: var(--code-bg); color: var(--code-fg); border-radius: 0 1.4mm 1.4mm 0; border-left: 1mm solid var(--accent);
+             font-family: "JetBrains Mono", Menlo, monospace; box-shadow: inset 0 0 0 .4pt #e4e7ee; }
+  pre.code .nb { color: #2563eb; }
+  pre.code .kw { font-weight: 600; }
+  table.kv td { border-bottom: .4pt solid var(--rule); }
+  table.ft th { color: var(--accent-dark); border-bottom: .7pt solid var(--accent); font-weight: 700; font-size: 5.6pt; }
+  table.ft td { border-bottom: .4pt solid var(--rule); }
+  c { font-family: "JetBrains Mono", Menlo, monospace; background: var(--accent-bg); color: #1f2937; }
+  .flow span { background: var(--accent-bg); border-color: var(--accent-soft); border-radius: 3mm; }
+  .flow i { color: var(--accent); }
+  p.note { color: var(--muted); }
+  footer { border-top: .5pt solid var(--rule); display: flex; justify-content: space-between; color: var(--muted); }
+  footer span + span::before { content: none; }
+  footer b { color: var(--ink); font-weight: 700; }
+  footer .sep { color: var(--accent); margin: 0 1.6mm; }
+</style>
+<style></style></head><body>
+<header class="band">
+  <div class="logo"><svg viewBox="0 0 24 24"><g stroke="#fff" stroke-width="1.3"><line x1="5" y1="7" x2="12" y2="5"/><line x1="5" y1="7" x2="12" y2="12"/><line x1="5" y1="17" x2="12" y2="12"/><line x1="5" y1="17" x2="12" y2="19"/><line x1="12" y1="5" x2="19" y2="12"/><line x1="12" y1="12" x2="19" y2="12"/><line x1="12" y1="19" x2="19" y2="12"/></g><g fill="#fff"><circle cx="5" cy="7" r="2.2"/><circle cx="5" cy="17" r="2.2"/><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/><circle cx="19" cy="12" r="2.6"/></g></svg></div>
+  <div class="title"><h1>Neural Net Training</h1><div class="kicker">Cheat Sheet &nbsp;<i>NumPy <i>np</i> &amp; PyTorch <i>torch</i>, <i>F = torch.nn.functional</i></i></div></div>
+  <div class="steps"><span><b>1</b>Activations</span><i class="arrow">›</i><span><b>2</b>Loss functions</span><i class="arrow">›</i><span><b>3</b>Optimizers</span><i class="arrow">›</i><span><b>4</b>Metrics</span></div>
+</header>
+
+<div class="grid">
+  <!-- ============ COLUMN 1 ============ -->
+  <div class="col">
+    <section>
+      <h2>Activation functions</h2>
+      <table class="ft">
+        <colgroup><col style="width:14%"><col style="width:38%"><col style="width:27%"><col style="width:21%"></colgroup>
+        <tr><th></th><th>Formula · derivative</th><th>NumPy</th><th>PyTorch</th></tr>
+        <tr><td>Sigmoid</td><td class="m">σ(x) = 1 / (1 + e<sup>−x</sup>)<br>σ′ = σ(1 − σ)</td><td><c>1/(1+np.exp(-x))</c></td><td><c>torch.sigmoid(x)</c></td></tr>
+        <tr><td>Tanh</td><td class="m">(e<sup>x</sup> − e<sup>−x</sup>) / (e<sup>x</sup> + e<sup>−x</sup>)<br>tanh′ = 1 − tanh²</td><td><c>np.tanh(x)</c></td><td><c>torch.tanh(x)</c></td></tr>
+        <tr><td>ReLU</td><td class="m">max(0, x)<br>ReLU′ = 1 if x &gt; 0 else 0</td><td><c>np.maximum(0, x)</c></td><td><c>F.relu(x)</c></td></tr>
+        <tr><td>Leaky ReLU</td><td class="m">x if x &gt; 0 else αx, α ≈ 0.01</td><td><c>np.where(x>0, x, a*x)</c></td><td><c>F.leaky_relu(x)</c></td></tr>
+        <tr><td>GELU</td><td class="m">x·Φ(x) ≈ ½x(1 + tanh[√(2/π)(x + 0.0447x³)])</td><td><c>.5*x*(1+np.tanh(.7979<br>  *(x+.0447*x**3)))</c></td><td><c>F.gelu(x)</c></td></tr>
+        <tr><td>SiLU / Swish</td><td class="m">x·σ(x), used in Llama</td><td><c>x/(1+np.exp(-x))</c></td><td><c>F.silu(x)</c></td></tr>
+        <tr><td>Softmax</td><td class="m">e<sup>x<sub>i</sub></sup> / Σ<sub>j</sub> e<sup>x<sub>j</sub></sup><br>subtract max(x) for stability</td><td><c>e = np.exp(x-x.max())<br>e / e.sum()</c></td><td><c>F.softmax(x, dim=-1)</c></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Loss functions</h2>
+      <table class="ft">
+        <colgroup><col style="width:14%"><col style="width:38%"><col style="width:27%"><col style="width:21%"></colgroup>
+        <tr><th></th><th>Formula (mean over n)</th><th>NumPy</th><th>PyTorch</th></tr>
+        <tr><td>MSE (L2)</td><td class="m">1/n Σ (y − ŷ)²</td><td><c>np.mean((y-p)**2)</c></td><td><c>F.mse_loss(p, y)</c></td></tr>
+        <tr><td>MAE (L1)</td><td class="m">1/n Σ |y − ŷ|, robust to outliers</td><td><c>np.mean(np.abs(y-p))</c></td><td><c>F.l1_loss(p, y)</c></td></tr>
+        <tr><td>Huber</td><td class="m">½e² if |e| ≤ δ else δ(|e| − ½δ)</td><td><c>a = np.abs(y-p)<br>np.mean(np.where(a&lt;=d,<br> .5*a**2, d*(a-.5*d)))</c></td><td><c>F.huber_loss(p, y)</c></td></tr>
+        <tr><td>Binary CE</td><td class="m">−[y log p + (1 − y) log(1 − p)]<br>p = σ(z); ∂L/∂z = p − y</td><td><c>-np.mean(y*np.log(p)<br>  +(1-y)*np.log(1-p))</c></td><td><c>F.binary_cross_<br>  entropy_with_<br>  logits(z, y)</c></td></tr>
+        <tr><td>Cross-entropy</td><td class="m">−log softmax(z)<sub>y</sub> = −z<sub>y</sub> + log Σ<sub>j</sub> e<sup>z<sub>j</sub></sup><br>∂L/∂z = softmax(z) − onehot(y)</td><td><c>-np.log(P[range(n),y]<br>  ).mean()</c></td><td><c>F.cross_entropy(z, y)</c></td></tr>
+        <tr><td>KL div.</td><td class="m">Σ p log(p / q), distillation</td><td><c>np.sum(p*np.log(p/q))</c></td><td><c>F.kl_div(q.log(), p,<br>  reduction=<br>  "batchmean")</c></td></tr>
+      </table>
+      <p class="note">PyTorch's <b>cross_entropy</b> and <b>BCE…with_logits</b> take raw <b>logits</b> (no softmax / sigmoid first): they're fused and numerically stable.</p>
+    </section>
+
+    <section>
+      <h3>Training checklist</h3>
+      <table class="kv">
+        <tr><td>Normalize inputs</td><td>zero mean, unit variance (train stats only)</td></tr>
+        <tr><td>Check initial loss</td><td>≈ ln K for K balanced classes; NaN → lower lr, clip grads</td></tr>
+        <tr><td>Overfit one batch</td><td>loss → 0, else there's a bug</td></tr>
+        <tr><td>train() / eval()</td><td>toggle dropout &amp; BatchNorm</td></tr>
+                <tr><td>Train ↓ val ↑</td><td>overfit: dropout, decay, more data, early stop</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h3>Autograd &amp; gradients</h3>
+      <table class="ft">
+        <colgroup><col style="width:14%"><col style="width:50%"><col style="width:36%"></colgroup>
+        <tr><td>Chain rule</td><td class="m">∂L/∂x = ∂L/∂y · ∂y/∂x, layer by layer</td><td><c>loss.backward(); w.grad</c></td></tr>
+        <tr><td>Grad check</td><td class="m">f′(x) ≈ (f(x + h) − f(x − h)) / 2h, h ≈ 1e-5</td><td><c>torch.autograd.gradcheck(f, x)</c></td></tr>
+        <tr><td>No grad</td><td class="m">stop tracking (eval, frozen parts)</td><td><c>torch.no_grad(), x.detach()</c></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <!-- ============ COLUMN 2 ============ -->
+  <div class="col">
+    <section>
+      <h2>Optimizers</h2>
+      <table class="ft">
+        <colgroup><col style="width:14%"><col style="width:52%"><col style="width:34%"></colgroup>
+        <tr><th></th><th>Update rule <span style="text-transform:none">(g = ∇<sub>θ</sub>L, η = learning rate)</span></th><th>torch.optim</th></tr>
+        <tr><td>SGD</td><td class="m">θ ← θ − η·g</td><td><c>SGD(params, lr=0.1)</c></td></tr>
+        <tr><td>Momentum</td><td class="m">v ← μv + g;  θ ← θ − η·v</td><td><c>SGD(..., momentum=0.9)</c></td></tr>
+        <tr><td>RMSProp</td><td class="m">s ← ρs + (1 − ρ)g²; θ ← θ − η·g / (√s + ε)</td><td><c>RMSprop(..., alpha=0.99)</c></td></tr>
+        <tr><td>Adam</td><td class="m">m ← β₁m + (1 − β₁)g; v ← β₂v + (1 − β₂)g²<br>m̂ = m / (1 − β₁<sup>t</sup>), v̂ = v / (1 − β₂<sup>t</sup>); θ ← θ − η·m̂ / (√v̂ + ε)</td><td><c>Adam(..., lr=1e-3,<br>  betas=(0.9, 0.999))</c></td></tr>
+        <tr><td>AdamW</td><td class="m">Adam + decoupled decay θ ← θ − ηλθ</td><td><c>AdamW(..., weight_decay=0.01)</c></td></tr>
+      </table>
+<pre class="code" data-code>def adamw_step(w, g, m, v, t, lr=1e-3, b1=0.9, b2=0.999,
+               eps=1e-8, wd=0.01):            # NumPy, t starts at 1
+    m = b1 * m + (1 - b1) * g                 # 1st moment (mean)
+    v = b2 * v + (1 - b2) * g ** 2            # 2nd moment (variance)
+    m_hat, v_hat = m / (1 - b1 ** t), v / (1 - b2 ** t)  # bias fix
+    w = w - lr * (m_hat / (np.sqrt(v_hat) + eps) + wd * w)
+    return w, m, v</pre>
+    </section>
+
+    <section>
+      <h3>Learning-rate schedules (torch.optim.lr_scheduler)</h3>
+      <table class="ft">
+        <colgroup><col style="width:14%"><col style="width:48%"><col style="width:38%"></colgroup>
+        <tr><td>StepLR</td><td class="m">η · γ<sup>⌊epoch / s⌋</sup></td><td><c>StepLR(opt, 30, gamma=0.1)</c></td></tr>
+        <tr><td>Cosine</td><td class="m">η<sub>min</sub> + ½(η<sub>max</sub> − η<sub>min</sub>)(1 + cos(πt / T))</td><td><c>CosineAnnealingLR(opt, T_max=T)</c></td></tr>
+        <tr><td>Warmup</td><td class="m">linear ramp ~0 → η over first steps</td><td><c>LinearLR(opt, 0.01, total_iters=500)</c></td></tr>
+        <tr><td>OneCycle</td><td class="m">warm up to max_lr, then anneal</td><td><c>OneCycleLR(opt, max_lr, total_steps=N)</c></td></tr>
+        <tr><td>On plateau</td><td class="m">× factor when the val metric stalls</td><td><c>ReduceLROnPlateau(opt, patience=5)</c></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Metrics</h2>
+      <table class="ft">
+        <colgroup><col style="width:13%"><col style="width:33%"><col style="width:31%"><col style="width:23%"></colgroup>
+        <tr><th></th><th>Formula</th><th>NumPy</th><th>PyTorch</th></tr>
+        <tr><td>Accuracy</td><td class="m">(TP + TN) / N</td><td><c>np.mean(pred == y)</c></td><td><c>(pred==y).float()<br>  .mean()</c></td></tr>
+        <tr><td>Precision</td><td class="m">TP / (TP + FP), predicted + that are right</td><td rowspan="3"><c>p1, y1 = pred==1, y==1<br>tp = (p1 &amp; y1).sum()<br>fp = (p1 &amp; ~y1).sum()<br>fn = (~p1 &amp; y1).sum()<br>P, R = tp/(tp+fp), tp/(tp+fn)<br>f1 = 2*P*R / (P + R)</c></td><td rowspan="3"><c>torchmetrics.<br>  F1Score(task=<br>  "multiclass",<br>  num_classes=K)</c></td></tr>
+        <tr><td>Recall</td><td class="m">TP / (TP + FN), real + that are found</td></tr>
+        <tr><td>F1</td><td class="m">2PR / (P + R), for imbalanced data</td></tr>
+        <tr><td>Confusion</td><td class="m">C[i, j] = #(true i, predicted j)</td><td><c>C=np.zeros((K,K),int)<br>np.add.at(C,(y,pred),1)</c></td><td><c>torchmetrics.<br>ConfusionMatrix</c></td></tr>
+        <tr><td>ROC-AUC</td><td class="m">area under the TPR-vs-FPR curve</td><td><c>roc_auc_score(y, s)</c> (sklearn)</td><td><c>torchmetrics.<br>  AUROC</c></td></tr>
+        <tr><td>R²</td><td class="m">1 − Σ(y − ŷ)² / Σ(y − ȳ)²</td><td><c>1 - ((y-p)**2).sum()<br>  / ((y-y.mean())**2)<br>  .sum()</c></td><td><c>torchmetrics.<br>  R2Score</c></td></tr>
+        <tr><td>Perplexity</td><td class="m">exp(mean cross-entropy)</td><td><c>np.exp(ce_loss)</c></td><td><c>torch.exp(loss)</c></td></tr>
+      </table>
+    </section>
+
+  </div>
+
+  <!-- ============ COLUMN 3 ============ -->
+  <div class="col">
+    <section>
+      <h2>Init, norm &amp; regularization</h2>
+      <table class="ft">
+        <colgroup><col style="width:19%"><col style="width:46%"><col style="width:35%"></colgroup>
+        <tr><td>He / Kaiming</td><td class="m">W ~ N(0, 2 / n<sub>in</sub>), for ReLU nets</td><td><c>nn.init.kaiming_normal_(w)</c></td></tr>
+        <tr><td>Xavier</td><td class="m">Var = 2 / (n<sub>in</sub> + n<sub>out</sub>), tanh / sigmoid</td><td><c>nn.init.xavier_uniform_(w)</c></td></tr>
+        <tr><td>BatchNorm</td><td class="m">γ(x − μ<sub>B</sub>) / √(σ²<sub>B</sub> + ε) + β, stats over batch</td><td><c>nn.BatchNorm1d(n)</c></td></tr>
+        <tr><td>LayerNorm</td><td class="m">same, stats over features of each sample</td><td><c>nn.LayerNorm(n)</c></td></tr>
+        <tr><td>Dropout</td><td class="m">zero with prob p, scale rest by 1 / (1 − p)</td><td><c>nn.Dropout(p=0.1)</c></td></tr>
+        <tr><td>Weight decay</td><td class="m">L + λ‖w‖², or θ ← θ − ηλθ (decoupled)</td><td><c>AdamW(weight_decay=0.01)</c></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>MLP from scratch (NumPy)</h2>
+      <p>Backprop is the chain rule for a dense layer <b>Z = XW + b</b>: <b>dW = Xᵀ·dZ</b>, <b>db = Σ dZ</b>, <b>dX = dZ·Wᵀ</b>.</p>
+<pre class="code" data-code>import numpy as np
+def softmax(z):
+    e = np.exp(z - z.max(1, keepdims=True))     # stable
+    return e / e.sum(1, keepdims=True)
+
+rng = np.random.default_rng(0)                  # X: [N, D], y: [N]
+W1 = rng.normal(0, np.sqrt(2 / D), (D, H)); b1 = np.zeros(H)
+W2 = rng.normal(0, np.sqrt(2 / H), (H, K)); b2 = np.zeros(K)
+for epoch in range(200):
+    Z1 = X @ W1 + b1; A1 = np.maximum(0, Z1)    # ReLU
+    P = softmax(A1 @ W2 + b2)
+    loss = -np.log(P[np.arange(N), y]).mean()
+    dZ2 = P.copy(); dZ2[np.arange(N), y] -= 1   # dL/dz
+    dZ2 /= N                                    # softmax-onehot
+    dW2, db2 = A1.T @ dZ2, dZ2.sum(0)
+    dZ1 = (dZ2 @ W2.T) * (Z1 > 0)               # ReLU'
+    dW1, db1 = X.T @ dZ1, dZ1.sum(0)
+    for p, g in [(W1, dW1), (b1, db1), (W2, dW2), (b2, db2)]:
+        p -= lr * g                             # SGD step</pre>
+    </section>
+
+    <section>
+      <h2>Same in PyTorch</h2>
+<pre class="code" data-code>model = nn.Sequential(nn.Linear(D, H), nn.ReLU(),
+                      nn.Dropout(0.1), nn.Linear(H, K)).to(dev)
+loss_fn = nn.CrossEntropyLoss()
+opt = torch.optim.AdamW(model.parameters(), lr=1e-3)
+sched = torch.optim.lr_scheduler.OneCycleLR(
+    opt, max_lr=1e-3, total_steps=E * len(train_dl))
+for epoch in range(E):
+    model.train()                       # dropout / BN on
+    for xb, yb in train_dl:
+        xb, yb = xb.to(dev), yb.to(dev)
+        loss = loss_fn(model(xb), yb)   # logits in
+        opt.zero_grad()                 # grads accumulate!
+        loss.backward()                 # autograd = backprop
+        nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        opt.step(); sched.step()
+    model.eval(); correct = 0
+    with torch.no_grad():
+        for xb, yb in val_dl:
+            pred = model(xb.to(dev)).argmax(1)
+            correct += (pred == yb.to(dev)).sum().item()
+    acc = correct / len(val_dl.dataset)</pre>
+    </section>
+
+  </div>
+</div>
+
+<footer><span><b>Neural Network Training Cheat Sheet</b><span class="sep">/</span>NumPy · PyTorch 2.x · torchmetrics</span><span>github.com/arnabdeypolimi/pytorch-cheatsheets<span class="sep">/</span>CC BY 4.0<span class="sep">/</span>v1.0 · 10/2026</span></footer>
+
+<script>
+  const KW = new Set(["class","def","return","import","from","as","for","in","with","if","else","True","False","None","super","lambda","and","or","not"]);
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const tok = /(#.*$)|("[^"]*"|'[^']*')|(\b[A-Za-z_]\w*\b)|([^#"'A-Za-z_]+)/gm;
+  document.querySelectorAll("pre[data-code]").forEach(pre => {
+    const lines = pre.textContent.split("\n");
+    pre.innerHTML = lines.map((line, i) => {
+      let out = "";
+      line.replace(tok, (m, cm, st, id, other) => {
+        if (cm) out += `<span class="cm">${esc(cm)}</span>`;
+        else if (st) out += `<span class="st">${esc(st)}</span>`;
+        else if (id) out += KW.has(id) ? `<span class="kw">${id}</span>` : (id === "self" ? `<span class="nb">self</span>` : id);
+        else out += esc(other);
+        return m;
+      });
+      return `<span class="ln">${i + 1}</span>${out}`;
+    }).join("\n");
+  });
+</script>
+
+</body></html>

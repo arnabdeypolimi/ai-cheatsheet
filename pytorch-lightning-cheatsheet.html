@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1150">
+<meta name="description" content="Free one-page PyTorch Lightning cheat sheet: LightningModule hooks, LightningDataModule, Trainer flags, callbacks, logging, checkpoints, multi-GPU and debugging. Printable PDF.">
+<link rel="canonical" href="https://arnabdeypolimi.github.io/pytorch-cheatsheets/pytorch-lightning-cheatsheet.html">
+<meta property="og:title" content="PyTorch Lightning Cheat Sheet (PDF): LightningModule, Trainer, DataModule">
+<meta property="og:description" content="Free one-page PyTorch Lightning cheat sheet: LightningModule hooks, LightningDataModule, Trainer flags, callbacks, logging, checkpoints, multi-GPU and debugging. Printable PDF.">
+<meta property="og:image" content="https://arnabdeypolimi.github.io/pytorch-cheatsheets/images/pytorch-lightning-cheatsheet.png">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+
+<title>PyTorch Lightning Cheat Sheet (PDF): LightningModule, Trainer, DataModule</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  :root {
+    --accent: #792ee5;
+    --accent-soft: #f6b5a5;
+    --accent-bg: #f4eefd;
+    --ink: #222;
+    --muted: #555;
+    --rule: #cfcfcf;
+    --code-bg: #1e1e1e;
+    --code-fg: #e8e8e8;
+    --code-cm: #8a8a8a;
+    --code-kw: #ff7a5c;
+    --code-st: #f0b35a;
+    --code-ln: #6a6a6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #fff; }
+  body {
+    width: 297mm; height: 210mm; overflow: hidden; position: relative;
+    font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+    font-size: 7.1pt; line-height: 1.28; color: var(--ink);
+    padding: 6mm 7mm 0 7mm;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .deco { position: absolute; top: 0; right: 0; width: 100mm; height: 27mm; z-index: 0; }
+  header { position: relative; z-index: 1; border-bottom: 0.6pt solid var(--rule); width: 205mm; padding-bottom: 1.6mm; }
+  h1 { font-weight: 300; font-size: 30pt; letter-spacing: -0.5pt; line-height: 1; color: #333; }
+  h1 .cs { font-size: 21pt; letter-spacing: 1pt; color: #555; margin-left: 3mm; }
+  h1 .bolt { display: inline-block; width: 6mm; height: 8mm; vertical-align: -1mm; margin-left: 2mm; }
+  .steps { display: flex; gap: 9mm; margin-top: 2.2mm; font-size: 8pt; }
+  .steps span b { display: inline-block; width: 3.8mm; height: 3.8mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 6.2pt; text-align: center; line-height: 3.8mm; margin-right: 1.4mm; font-weight: 500; }
+
+  .grid { position: relative; z-index: 1; display: grid; grid-template-columns: 97mm 97mm 1fr; gap: 0 5mm; margin-top: 2.4mm; height: 166mm; }
+  .col { display: flex; flex-direction: column; gap: 2.2mm; }
+  .col + .col { border-left: 0.6pt solid var(--rule); padding-left: 4mm; }
+  h2 { font-weight: 300; font-size: 15pt; color: var(--accent); line-height: 1.05; margin-bottom: 1mm; }
+  h3 { font-weight: 400; font-size: 7.6pt; color: var(--accent); text-transform: uppercase; letter-spacing: 0.3pt; margin: 1mm 0 0.6mm; }
+  p { margin-bottom: 1mm; }
+  p.note { font-style: italic; color: var(--muted); font-size: 6.7pt; }
+  code, .k { font-weight: 700; font-family: inherit; }
+
+  table.kv { width: 100%; border-collapse: collapse; margin: 0.6mm 0 0.4mm; }
+  table.kv td { padding: 0.55mm 0; vertical-align: top; border-bottom: 0.4pt solid #ececec; }
+  table.kv tr:last-child td { border-bottom: none; }
+  table.kv td:first-child { font-weight: 700; padding-right: 2mm; white-space: nowrap; }
+  table.kv.quad td:nth-child(3) { font-weight: 700; padding-right: 2mm; padding-left: 2mm; white-space: nowrap; }
+  table.kv.wrap td:first-child { white-space: normal; width: 42%; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 3mm; }
+
+  pre.code {
+    background: var(--code-bg); color: var(--code-fg); border-radius: 1mm;
+    font-family: "Roboto Mono", Menlo, monospace; font-size: 5.85pt; line-height: 1.36;
+    padding: 1.4mm 2mm 1.4mm 1.2mm; white-space: pre; overflow: hidden;
+  }
+  pre.code .ln { color: var(--code-ln); display: inline-block; width: 3.4mm; text-align: right; margin-right: 1.8mm; user-select: none; }
+  pre.code .cm { color: var(--code-cm); }
+  pre.code .kw { color: var(--code-kw); }
+  pre.code .st { color: var(--code-st); }
+  pre.code .nb { color: #9cdcfe; }
+
+  .hook { display: grid; grid-template-columns: 7mm 1fr; gap: 0 2mm; align-items: start; margin-bottom: 1.2mm; }
+  .hook svg { width: 7mm; height: 5mm; }
+  .card { background: var(--accent-bg); border-radius: 1.5mm; padding: 1.6mm 2mm; }
+  .card .tag { float: right; width: 3.6mm; height: 3.6mm; border-radius: 50%; background: var(--accent); color: #fff; font-size: 6pt; text-align: center; line-height: 3.6mm; }
+
+  .flow { display: flex; align-items: center; gap: 1mm; font-size: 6.3pt; margin: 0.8mm 0 1mm; flex-wrap: wrap; }
+  .flow span { background: var(--accent-bg); border: 0.5pt solid var(--accent-soft); border-radius: 0.8mm; padding: 0.4mm 1.2mm; font-weight: 500; }
+  .flow i { color: var(--accent); font-style: normal; }
+
+  footer { position: absolute; left: 7mm; right: 7mm; bottom: 3.2mm; border-top: 0.6pt solid var(--rule); padding-top: 1.2mm; text-align: right; font-size: 6.5pt; color: #444; z-index: 1; }
+  footer span + span::before { content: "•"; margin: 0 2.5mm 0 4mm; }
+</style>
+<style id="theme">
+  :root {
+    --accent: #792ee5; --accent-soft: #c9adf5; --accent-bg: #f4eefd; --accent-dark: #5b1fb8;
+    --ink: #1f2430; --muted: #5b6270; --rule: #e3e6ec; --band: #141824;
+    --code-bg: #f6f7fa; --code-fg: #1f2937; --code-cm: #8b94a3; --code-kw: #5b1fb8;
+    --code-st: #b45309; --code-ln: #b9bfca;
+  }
+  body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; padding-top: 0; letter-spacing: -0.05pt; }
+  .band { display: flex; align-items: center; gap: 3.5mm; margin: 0 -7mm; padding: 0 7mm; height: 17mm;
+          background: var(--band); color: #fff; border-bottom: 1.2mm solid var(--accent); width: auto; }
+  .band .logo { width: 10mm; height: 10mm; border-radius: 2.4mm; background: var(--accent); display: grid; place-items: center; flex: none; }
+  .band .logo svg { width: 7mm; height: 7mm; }
+  .band .title { flex: none; }
+  .band h1 { white-space: nowrap; font-weight: 800; font-size: 19pt; letter-spacing: -0.6pt; color: #fff; line-height: 1; }
+  .band .kicker { font-size: 6.4pt; font-weight: 600; letter-spacing: 1.6pt; text-transform: uppercase; color: var(--accent-soft); margin-top: 1.2mm; }
+  .band .kicker { white-space: nowrap; }
+  .band .kicker i { font-style: normal; letter-spacing: .2pt; text-transform: none; color: #c5cad6; font-weight: 400; }
+  .band .steps { margin: 0 0 0 auto; display: flex; gap: 1.6mm; font-size: 7pt; align-items: center; }
+  .band .steps span { background: rgba(255,255,255,.08); border: .5pt solid rgba(255,255,255,.18); border-radius: 4mm; padding: .9mm 2.4mm .9mm 1mm; color: #e9ecf2; }
+  .band .steps span b { background: var(--accent); color: #fff; width: 3.8mm; height: 3.8mm; line-height: 3.8mm; margin-right: 1.3mm; }
+  .band .steps i.arrow { color: var(--accent-soft); font-style: normal; font-size: 7pt; }
+  .grid { margin-top: 3.4mm; height: 176mm; }
+  .col + .col { border-left: none; padding-left: 0; }
+  h2 { font-family: "Inter", sans-serif; font-weight: 750; font-size: 11pt; color: var(--ink); letter-spacing: -0.3pt;
+       display: flex; align-items: center; gap: 1.6mm; margin-bottom: 1.2mm; }
+  h2::before { content: ""; width: 1.4mm; height: 3.6mm; border-radius: .5mm; background: var(--accent); flex: none; }
+  h3 { font-weight: 700; font-size: 6.4pt; letter-spacing: .8pt; color: var(--accent-dark); }
+  pre.code { background: var(--code-bg); color: var(--code-fg); border-radius: 0 1.4mm 1.4mm 0; border-left: 1mm solid var(--accent);
+             font-family: "JetBrains Mono", Menlo, monospace; box-shadow: inset 0 0 0 .4pt #e4e7ee; }
+  pre.code .nb { color: #2563eb; }
+  pre.code .kw { font-weight: 600; }
+  table.kv td { border-bottom: .4pt solid var(--rule); }
+  table.ft th { color: var(--accent-dark); border-bottom: .7pt solid var(--accent); font-weight: 700; font-size: 5.6pt; }
+  table.ft td { border-bottom: .4pt solid var(--rule); }
+  c { font-family: "JetBrains Mono", Menlo, monospace; background: var(--accent-bg); color: #1f2937; }
+  .flow span { background: var(--accent-bg); border-color: var(--accent-soft); border-radius: 3mm; }
+  .flow i { color: var(--accent); }
+  p.note { color: var(--muted); }
+  footer { border-top: .5pt solid var(--rule); display: flex; justify-content: space-between; color: var(--muted); }
+  footer span + span::before { content: none; }
+  footer b { color: var(--ink); font-weight: 700; }
+  footer .sep { color: var(--accent); margin: 0 1.6mm; }
+</style>
+<style>body { font-size: 6.75pt; } table.kv td { padding: .45mm 0; }</style></head>
+<body>
+
+<!-- decorative corner: network graph with a bolt -->
+<header class="band">
+  <div class="logo"><svg viewBox="0 0 24 24"><path d="M13 2 L4 13 L10 13 L8 22 L18 9 L12 9 L14 2 Z" fill="#fff"/></svg></div>
+  <div class="title"><h1>PyTorch Lightning</h1><div class="kicker">Cheat Sheet</div></div>
+  <div class="steps"><span><b>1</b>Prepare data</span><i class="arrow">›</i><span><b>2</b>Define LightningModule</span><i class="arrow">›</i><span><b>3</b>Configure Trainer</span><i class="arrow">›</i><span><b>4</b>Fit, test &amp; predict</span></div>
+</header>
+
+<div class="grid">
+  <!-- ============ COLUMN 1 ============ -->
+  <div class="col">
+    <section>
+      <h2>General</h2>
+      <p>PyTorch Lightning is a lightweight wrapper around PyTorch that <b>separates research code from engineering code</b>. You write the model logic in a <b>LightningModule</b>. The <b>Trainer</b> handles the loop, devices, precision, checkpointing and logging. No more <code>.to(device)</code>, <code>loss.backward()</code> or <code>optimizer.step()</code> by hand.</p>
+      <table class="kv quad">
+        <tr><td>import lightning as L</td><td>Root package</td><td>L.Trainer(...)</td><td>Runs all loops</td></tr>
+        <tr><td>L.LightningModule</td><td>Model + logic</td><td>L.seed_everything(42)</td><td>Reproducibility</td></tr>
+        <tr><td>L.LightningDataModule</td><td>Data pipeline</td><td>self.save_hyperparameters()</td><td>Store init args</td></tr>
+      </table>
+      <p class="note">Older code uses <b>import pytorch_lightning as pl</b>. Same API, legacy package name.</p>
+    </section>
+
+    <section>
+      <h2>LightningModule hooks</h2>
+      <div class="two">
+        <div>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="1" y="3" width="8" height="14" fill="#792ee5"/><rect x="11" y="3" width="6" height="14" fill="#c9adf5"/><rect x="19" y="3" width="8" height="14" fill="#f4eefd"/></svg>
+            <div><b>forward(x)</b>: inference / prediction logic, used by <code>model(x)</code></div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 16 Q10 2 26 4" stroke="#792ee5" stroke-width="2.4" fill="none"/><circle cx="26" cy="4" r="2.5" fill="#792ee5"/></svg>
+            <div><b>training_step(batch, idx)</b>: return the loss; Lightning runs backward &amp; step</div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="2" width="24" height="16" rx="2" fill="#f4eefd" stroke="#792ee5"/><path d="M7 10 l4 4 l9 -9" stroke="#792ee5" stroke-width="2.2" fill="none"/></svg>
+            <div><b>validation_step / test_step</b>: compute &amp; <code>self.log</code> metrics, no grads</div></div>
+        </div>
+        <div>
+          <div class="hook"><svg viewBox="0 0 28 20"><circle cx="8" cy="10" r="6" fill="#c9adf5"/><path d="M14 10 h11 m-4 -4 l4 4 l-4 4" stroke="#792ee5" stroke-width="2.2" fill="none"/></svg>
+            <div><b>predict_step</b>: what <code>trainer.predict()</code> returns per batch</div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 4 Q8 18 14 12 T26 16" stroke="#792ee5" stroke-width="2.4" fill="none"/><line x1="2" y1="18" x2="26" y2="18" stroke="#bbb"/></svg>
+            <div><b>configure_optimizers</b>: return optimizer(s) &amp; LR scheduler(s)</div></div>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="7" width="5" height="6" fill="#792ee5"/><rect x="9" y="7" width="5" height="6" fill="#c9adf5"/><rect x="16" y="7" width="5" height="6" fill="#792ee5"/><rect x="23" y="7" width="3" height="6" fill="#c9adf5"/></svg>
+            <div><b>on_train_epoch_end</b> and 20+ more hooks to inject logic at any point</div></div>
+        </div>
+      </div>
+      <div class="flow"><span>on_fit_start</span><i>→</i><span>training_step ×N</span><i>→</i><span>validation_step ×M</span><i>→</i><span>on_*_epoch_end</span><i>↺</i></div>
+    </section>
+
+    <section>
+      <h2>Prepare data</h2>
+      <p>A <b>LightningDataModule</b> bundles download, split, transforms and the <b>DataLoader</b>s so the same data pipeline is reusable across experiments. Plain DataLoaders passed to <code>trainer.fit()</code> work too.</p>
+<pre class="code" data-code>class MNISTData(L.LightningDataModule):
+    def __init__(self, data_dir="./data", batch_size=64):
+        super().__init__()
+        self.data_dir, self.bs = data_dir, batch_size
+
+    def prepare_data(self):     # download once (rank 0 only)
+        MNIST(self.data_dir, download=True)
+
+    def setup(self, stage):     # split/transform on every GPU
+        full = MNIST(self.data_dir, transform=ToTensor())
+        self.train, self.val = random_split(full, [55000, 5000])
+
+    def train_dataloader(self):
+        return DataLoader(self.train, batch_size=self.bs,
+                          shuffle=True, num_workers=4)
+
+    def val_dataloader(self):
+        return DataLoader(self.val, batch_size=self.bs)</pre>
+    </section>
+    <section>
+      <h3>Callbacks (lightning.pytorch.callbacks)</h3>
+      <table class="kv">
+        <tr><td>LearningRateMonitor()</td><td>Log the LR each step / epoch</td></tr>
+        <tr><td>StochasticWeightAveraging()</td><td>SWA for better generalization</td></tr>
+        <tr><td>Tuner(trainer).lr_find(model)</td><td>Suggest a learning rate (lightning.pytorch.tuner)</td></tr>
+      </table>
+    </section>
+  </div>
+
+  <!-- ============ COLUMN 2 ============ -->
+  <div class="col">
+    <section>
+      <h2>Define LightningModule</h2>
+      <p>A LightningModule <b>is</b> an <b>nn.Module</b> with training hooks added. Any PyTorch model, e.g. an <b>nn.Sequential</b>, goes inside it.</p>
+<pre class="code" data-code>import torch, torch.nn as nn, torch.nn.functional as F
+from torch.optim.lr_scheduler import CosineAnnealingLR
+import lightning as L
+
+class LitClassifier(L.LightningModule):
+    def __init__(self, lr=1e-3):
+        super().__init__()
+        self.save_hyperparameters()   # -> self.hparams.lr
+        self.net = nn.Sequential(
+            nn.Flatten(), nn.Linear(28*28, 128),
+            nn.ReLU(), nn.Dropout(0.2), nn.Linear(128, 10))
+
+    def forward(self, x):
+        return self.net(x)
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch                  # already on device
+        loss = F.cross_entropy(self(x), y)
+        self.log("train_loss", loss, prog_bar=True)
+        return loss          # Lightning does backward + step
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        logits = self(x)
+        loss = F.cross_entropy(logits, y)
+        acc = (logits.argmax(1) == y).float().mean()
+        self.log_dict({"val_loss": loss, "val_acc": acc},
+                      prog_bar=True)
+
+    def configure_optimizers(self):
+        opt = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+        sched = CosineAnnealingLR(opt, T_max=self.trainer.max_epochs)
+        return {"optimizer": opt, "lr_scheduler": sched}</pre>
+    </section>
+
+    <section>
+      <h2>Logging</h2>
+      <table class="kv wrap">
+        <tr><td>self.log(name, value)</td><td>Logs a scalar. Use <b>on_step</b> / <b>on_epoch</b> to choose when it is reduced</td></tr>
+        <tr><td>prog_bar=True</td><td>Show the value in the progress bar</td></tr>
+        <tr><td>sync_dist=True</td><td>Average across GPUs in distributed runs</td></tr>
+        <tr><td>self.log_dict({...})</td><td>Log many metrics at once</td></tr>
+      </table>
+      <h3>Loggers (lightning.pytorch.loggers)</h3>
+      <table class="kv">
+        <tr><td>TensorBoardLogger("logs/")</td><td>Default when tensorboard is installed</td></tr>
+        <tr><td>CSVLogger("logs/")</td><td>Plain CSV, zero dependencies</td></tr>
+        <tr><td>WandbLogger(project="x")</td><td>Weights &amp; Biases (also MLflow, Comet, Neptune)</td></tr>
+      </table>
+      <p class="note">Pass with <b>L.Trainer(logger=WandbLogger(...))</b>. For robust metrics use <b>torchmetrics</b>, e.g. <b>Accuracy(task="multiclass", num_classes=10)</b>.</p>
+    </section>
+
+  </div>
+
+  <!-- ============ COLUMN 3 ============ -->
+  <div class="col">
+    <section>
+      <h2>Configure Trainer &amp; fit</h2>
+<pre class="code" data-code>from lightning.pytorch.callbacks import (
+    ModelCheckpoint, EarlyStopping)
+
+ckpt = ModelCheckpoint(monitor="val_loss", mode="min")
+stop = EarlyStopping(monitor="val_loss", patience=3)
+trainer = L.Trainer(
+    max_epochs=10,
+    accelerator="auto",    # "gpu", "cpu", "mps"
+    devices="auto",        # 1, 4, [0, 2], -1 = all
+    precision="16-mixed",  # "bf16-mixed", "32-true"
+    callbacks=[ckpt, stop])
+model, dm = LitClassifier(lr=1e-3), MNISTData()
+trainer.fit(model, datamodule=dm)   # train + val
+trainer.test(model, datamodule=dm)  # test_step
+preds = trainer.predict(model, loader)</pre>
+    </section>
+
+    <section>
+      <h3>Useful Trainer flags</h3>
+      <table class="kv">
+        <tr><td>strategy="ddp"</td><td>Multi-GPU (or "fsdp", "deepspeed")</td></tr>
+        <tr><td>num_nodes=2</td><td>Multi-node training</td></tr>
+        <tr><td>gradient_clip_val=1.0</td><td>Clip gradient norm</td></tr>
+        <tr><td>accumulate_grad_batches=4</td><td>Bigger effective batch size</td></tr>
+        <tr><td>val_check_interval=0.25</td><td>Validate 4× per epoch</td></tr>
+        <tr><td>log_every_n_steps=50</td><td>Logging frequency</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h3>Debugging flags</h3>
+      <table class="kv">
+        <tr><td>fast_dev_run=True</td><td>1 batch of train/val/test, catches bugs</td></tr>
+        <tr><td>overfit_batches=10</td><td>Can the model overfit 10 batches?</td></tr>
+        <tr><td>limit_train_batches=0.1</td><td>Use 10% of the data per epoch</td></tr>
+        <tr><td>detect_anomaly=True</td><td>Find the op that produced NaN / Inf</td></tr>
+        <tr><td>profiler="simple"</td><td>Time every hook ("advanced", "pytorch")</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Save/Load checkpoint</h2>
+      <p>A <b>.ckpt</b> holds weights, optimizer, scheduler, epoch &amp; hparams. <b>ModelCheckpoint</b> writes them to the log folder.</p>
+<pre class="code" data-code>model = LitClassifier.load_from_checkpoint("best.ckpt")
+model.eval()                      # for inference
+trainer.fit(model, datamodule=dm, ckpt_path="last")
+trainer.save_checkpoint("manual.ckpt")</pre>
+    </section>
+
+    <section>
+      <h3>Beyond the Trainer</h3>
+      <table class="kv">
+        <tr><td>torch.compile(model)</td><td>Compile, then fit as usual</td></tr>
+        <tr><td>LightningCLI(Model, Data)</td><td>YAML / CLI config for free</td></tr>
+        <tr><td>L.Fabric()</td><td>Own loop, Lightning scaling</td></tr>
+      </table>
+    </section>
+  </div>
+</div>
+
+<footer><span><b>PyTorch Lightning Cheat Sheet</b><span class="sep">/</span>Lightning 2.x</span><span>github.com/arnabdeypolimi/pytorch-cheatsheets<span class="sep">/</span>CC BY 4.0<span class="sep">/</span>v1.0 · 10/2026</span></footer>
+
+<script>
+  const KW = new Set(["class","def","return","import","from","as","for","in","with","if","else","True","False","None","super","lambda","and","or","not"]);
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const tok = /(#.*$)|("[^"]*"|'[^']*')|(\b[A-Za-z_]\w*\b)|([^#"'A-Za-z_]+)/gm;
+  document.querySelectorAll("pre[data-code]").forEach(pre => {
+    const lines = pre.textContent.split("\n");
+    pre.innerHTML = lines.map((line, i) => {
+      let out = "";
+      line.replace(tok, (m, cm, st, id, other) => {
+        if (cm) out += `<span class="cm">${esc(cm)}</span>`;
+        else if (st) out += `<span class="st">${esc(st)}</span>`;
+        else if (id) out += KW.has(id) ? `<span class="kw">${id}</span>` : (id === "self" ? `<span class="nb">self</span>` : id);
+        else out += esc(other);
+        return m;
+      });
+      return `<span class="ln">${i + 1}</span>${out}`;
+    }).join("\n");
+  });
+</script>
+</body>
+</html>
