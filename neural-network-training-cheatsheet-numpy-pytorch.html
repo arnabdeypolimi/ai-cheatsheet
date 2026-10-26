@@ -9,13 +9,13 @@
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary_large_image">
 <title>Neural Network Training Cheat Sheet: Activations, Losses, Optimizers, Metrics (NumPy & PyTorch)</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Red+Hat+Mono:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <style>
   @page { size: 297mm 210mm; margin: 0; }
   :root {
-    --accent: #2563eb;
+    --accent: oklch(0.52 0.15 255);
     --accent-soft: #f6b5a5;
-    --accent-bg: #eaf0fd;
+    --accent-bg: oklch(0.95 0.02 255);
     --ink: #222;
     --muted: #555;
     --rule: #cfcfcf;
@@ -98,55 +98,68 @@
   .steps .sub { margin-left: auto; color: var(--muted); font-size: 6.6pt; padding-top: .6mm; }
   header .steps { width: 100%; }
 </style>
-<style id="theme">
-  :root {
-    --accent: #2563eb; --accent-soft: #a9c1f7; --accent-bg: #eaf0fd; --accent-dark: #1d4ed8;
-    --ink: #1f2430; --muted: #5b6270; --rule: #e3e6ec; --band: #141824;
-    --code-bg: #f6f7fa; --code-fg: #1f2937; --code-cm: #8b94a3; --code-kw: #1d4ed8;
-    --code-st: #b45309; --code-ln: #b9bfca;
-  }
-  body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; padding-top: 0; letter-spacing: -0.05pt; }
-  .band { display: flex; align-items: center; gap: 3.5mm; margin: 0 -7mm; padding: 0 7mm; height: 17mm;
-          background: var(--band); color: #fff; border-bottom: 1.2mm solid var(--accent); width: auto; }
-  .band .logo { width: 10mm; height: 10mm; border-radius: 2.4mm; background: var(--accent); display: grid; place-items: center; flex: none; }
-  .band .logo svg { width: 7mm; height: 7mm; }
-  .band .title { flex: none; }
-  .band h1 { white-space: nowrap; font-weight: 800; font-size: 19pt; letter-spacing: -0.6pt; color: #fff; line-height: 1; }
-  .band .kicker { font-size: 6.4pt; font-weight: 600; letter-spacing: 1.6pt; text-transform: uppercase; color: var(--accent-soft); margin-top: 1.2mm; }
-  .band .kicker { white-space: nowrap; }
-  .band .kicker i { font-style: normal; letter-spacing: .2pt; text-transform: none; color: #c5cad6; font-weight: 400; }
-  .band .steps { margin: 0 0 0 auto; display: flex; gap: 1.6mm; font-size: 7pt; align-items: center; }
-  .band .steps span { background: rgba(255,255,255,.08); border: .5pt solid rgba(255,255,255,.18); border-radius: 4mm; padding: .9mm 2.4mm .9mm 1mm; color: #e9ecf2; }
-  .band .steps span b { background: var(--accent); color: #fff; width: 3.8mm; height: 3.8mm; line-height: 3.8mm; margin-right: 1.3mm; }
-  .band .steps i.arrow { color: var(--accent-soft); font-style: normal; font-size: 7pt; }
-  .grid { margin-top: 3.4mm; height: 176mm; }
-  .col + .col { border-left: none; padding-left: 0; }
-  h2 { font-family: "Inter", sans-serif; font-weight: 750; font-size: 11pt; color: var(--ink); letter-spacing: -0.3pt;
-       display: flex; align-items: center; gap: 1.6mm; margin-bottom: 1.2mm; }
-  h2::before { content: ""; width: 1.4mm; height: 3.6mm; border-radius: .5mm; background: var(--accent); flex: none; }
-  h3 { font-weight: 700; font-size: 6.4pt; letter-spacing: .8pt; color: var(--accent-dark); }
-  pre.code { background: var(--code-bg); color: var(--code-fg); border-radius: 0 1.4mm 1.4mm 0; border-left: 1mm solid var(--accent);
-             font-family: "JetBrains Mono", Menlo, monospace; box-shadow: inset 0 0 0 .4pt #e4e7ee; }
-  pre.code .nb { color: #2563eb; }
+<style>
+  :root { --accent: oklch(0.52 0.15 255); --accent-soft: oklch(0.80 0.06 255); --accent-bg: oklch(0.95 0.02 255); --acc: oklch(0.52 0.15 255); --acc-ink: oklch(0.42 0.13 255); --acc-tint: oklch(0.95 0.02 255);
+          --muted: var(--ink-2); --code-bg: var(--code-paper); --code-fg: var(--ink); --code-cm: var(--ink-3);
+          --code-kw: var(--acc-ink); --code-st: oklch(0.47 0.11 55); --code-ln: var(--ink-3); }
+  html, body { background: var(--paper); }
+  body { font-family: var(--f-body); color: var(--ink); counter-reset: sec; padding-top: 6mm; }
+  header.top { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 3mm 6mm; width: auto; padding-bottom: 2.2mm; }
+  .top .ttl { display: flex; flex-direction: column; gap: 1.2mm; }
+  .top .steps { display: flex; gap: 4.5mm; margin: 0; padding: 0 0 .6mm; list-style: none; font-size: 7.4pt; font-weight: 500; color: var(--ink); }
+  .top .steps li { display: flex; align-items: baseline; gap: 1.2mm; }
+  .top .steps b { font-family: var(--f-mono); font-weight: 600; font-size: 6.6pt; color: var(--acc); }
+  .top .sub { grid-column: 1 / -1; font-size: 6.6pt; color: var(--ink-2); margin-top: -1.4mm; }
+  .grid { margin-top: 3.4mm; height: 168mm; }
+  h2 { color: var(--ink); counter-increment: sec; margin-bottom: 1.1mm; line-height: 1.1; }
+  h2::before { font-variant-numeric: tabular-nums; }
+  h3 { text-transform: uppercase; }
+  p.note { color: var(--ink-2); }
+  pre.code { font-family: var(--f-mono); background: var(--code-bg); color: var(--ink); border-radius: 0;
+             border: .5pt solid var(--rule); box-shadow: none; }
+  pre.code .nb { color: var(--ink); }
   pre.code .kw { font-weight: 600; }
   table.kv td { border-bottom: .4pt solid var(--rule); }
-  table.ft th { color: var(--accent-dark); border-bottom: .7pt solid var(--accent); font-weight: 700; font-size: 5.6pt; }
+  table.ft th { color: var(--acc-ink); border-bottom: .8pt solid var(--ink); }
   table.ft td { border-bottom: .4pt solid var(--rule); }
-  c { font-family: "JetBrains Mono", Menlo, monospace; background: var(--accent-bg); color: #1f2937; }
-  .flow span { background: var(--accent-bg); border-color: var(--accent-soft); border-radius: 3mm; }
-  .flow i { color: var(--accent); }
-  p.note { color: var(--muted); }
-  footer { border-top: .5pt solid var(--rule); display: flex; justify-content: space-between; color: var(--muted); }
+  td.m { color: var(--ink); }
+  c { font-family: var(--f-mono); background: none; padding: 0; color: var(--ink); }
+  .flow span { background: none; border: .5pt solid var(--ink-3); border-radius: 0; font-weight: 500; }
+  .flow i { color: var(--acc); }
+  .hook svg { opacity: .9; }
+  footer { border-top: .6pt solid var(--ink); display: flex; justify-content: space-between; color: var(--ink-2); font-family: var(--f-body); }
   footer span + span::before { content: none; }
   footer b { color: var(--ink); font-weight: 700; }
-  footer .sep { color: var(--accent); margin: 0 1.6mm; }
-</style>
-<style></style></head><body>
-<header class="band">
-  <div class="logo"><svg viewBox="0 0 24 24"><g stroke="#fff" stroke-width="1.3"><line x1="5" y1="7" x2="12" y2="5"/><line x1="5" y1="7" x2="12" y2="12"/><line x1="5" y1="17" x2="12" y2="12"/><line x1="5" y1="17" x2="12" y2="19"/><line x1="12" y1="5" x2="19" y2="12"/><line x1="12" y1="12" x2="19" y2="12"/><line x1="12" y1="19" x2="19" y2="12"/></g><g fill="#fff"><circle cx="5" cy="7" r="2.2"/><circle cx="5" cy="17" r="2.2"/><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/><circle cx="19" cy="12" r="2.6"/></g></svg></div>
-  <div class="title"><h1>Neural Net Training</h1><div class="kicker">Cheat Sheet &nbsp;<i>NumPy <i>np</i> &amp; PyTorch <i>torch</i>, <i>F = torch.nn.functional</i></i></div></div>
-  <div class="steps"><span><b>1</b>Activations</span><i class="arrow">›</i><span><b>2</b>Loss functions</span><i class="arrow">›</i><span><b>3</b>Optimizers</span><i class="arrow">›</i><span><b>4</b>Metrics</span></div>
-</header>
+  footer .sep { color: var(--ink-3); margin: 0 1.6mm; }
+
+  :root { --paper: oklch(0.968 0.013 85); --ink: oklch(0.24 0.012 70); --ink-2: oklch(0.42 0.012 70);
+          --ink-3: oklch(0.58 0.012 70); --rule: oklch(0.80 0.014 80); --code-paper: oklch(0.935 0.014 85);
+          --f-display: "Barlow Condensed", sans-serif; --f-body: "Barlow Semi Condensed", sans-serif; --f-mono: "Red Hat Mono", monospace; }
+  header.top { border-bottom: 1.4pt solid var(--ink); }
+  .top .series > i { font-style: normal; text-transform: none; letter-spacing: .2pt; font-weight: 500; color: var(--ink-3); margin-left: 2.2mm; }
+  .top .series { font-family: var(--f-display); font-weight: 600; font-size: 7pt; letter-spacing: 1.4pt; text-transform: uppercase; color: var(--ink-2); }
+  .top .series b { color: var(--acc); font-weight: 700; }
+  .top h1 { font-family: var(--f-display); font-weight: 700; font-size: 27pt; text-transform: uppercase; letter-spacing: .2pt; line-height: .92; }
+  h2 { font-family: var(--f-display); font-weight: 700; font-size: 11.5pt; text-transform: uppercase; letter-spacing: .4pt;
+       border-bottom: .6pt solid var(--ink); padding-bottom: .5mm; }
+  h2::before { content: counter(sec, decimal-leading-zero); color: var(--acc); margin-right: 1.8mm; }
+  h3 { font-family: var(--f-display); font-weight: 600; font-size: 7.6pt; letter-spacing: 1pt; color: var(--acc-ink); }
+  table.kv td, table.ft td { border-bottom: .5pt dotted var(--rule); }
+  .col + .col { border-left: .5pt solid var(--rule); padding-left: 3.6mm; }
+  .top .series > i i { margin: 0; font-family: var(--f-mono); color: var(--ink-2); }
+  /* code: VS Code Dark+ */
+  pre.code { background: #1e1e1e; color: #d4d4d4; border: none; border-radius: .8mm; padding: 1.5mm 2mm 1.5mm 1.2mm; }
+  pre.code .ln { color: #6e7681; }
+  pre.code .cm { color: #6a9955; }
+  pre.code .kw { color: #c586c0; font-weight: 400; }
+  pre.code .kw2 { color: #569cd6; }
+  pre.code .fn { color: #dcdcaa; }
+  pre.code .ty { color: #4ec9b0; }
+  pre.code .st { color: #ce9178; }
+  pre.code .nu { color: #b5cea8; }
+  pre.code .va { color: #9cdcfe; }
+</style></head><body>
+<header class="top"><div class="ttl"><div class="series">AI Cheat Sheet <b>Nº 03</b><i>NumPy <i>np</i> &amp; PyTorch <i>torch</i>, <i>F = torch.nn.functional</i></i></div><h1>Neural Net Training</h1></div><ol class="steps"><li><b>1</b>Activations</li><li><b>2</b>Loss functions</li><li><b>3</b>Optimizers</li><li><b>4</b>Metrics</li></ol></header>
 
 <div class="grid">
   <!-- ============ COLUMN 1 ============ -->
@@ -228,7 +241,7 @@
     <section>
       <h3>Learning-rate schedules (torch.optim.lr_scheduler)</h3>
       <table class="ft">
-        <colgroup><col style="width:14%"><col style="width:48%"><col style="width:38%"></colgroup>
+        <colgroup><col style="width:13%"><col style="width:43%"><col style="width:44%"></colgroup>
         <tr><td>StepLR</td><td class="m">η · γ<sup>⌊epoch / s⌋</sup></td><td><c>StepLR(opt, 30, gamma=0.1)</c></td></tr>
         <tr><td>Cosine</td><td class="m">η<sub>min</sub> + ½(η<sub>max</sub> − η<sub>min</sub>)(1 + cos(πt / T))</td><td><c>CosineAnnealingLR(opt, T_max=T)</c></td></tr>
         <tr><td>Warmup</td><td class="m">linear ramp ~0 → η over first steps</td><td><c>LinearLR(opt, 0.01, total_iters=500)</c></td></tr>
@@ -325,17 +338,23 @@ for epoch in range(E):
 <footer><span><b>Neural Network Training Cheat Sheet</b><span class="sep">/</span>NumPy · PyTorch 2.x · torchmetrics</span><span>github.com/arnabdeypolimi/ai-cheatsheet<span class="sep">/</span>CC BY 4.0<span class="sep">/</span>v1.0 · 10/2026</span></footer>
 
 <script>
-  const KW = new Set(["class","def","return","import","from","as","for","in","with","if","else","True","False","None","super","lambda","and","or","not"]);
-  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  const tok = /(#.*$)|("[^"]*"|'[^']*')|(\b[A-Za-z_]\w*\b)|([^#"'A-Za-z_]+)/gm;
+  // VS Code Dark+ style tokenizer for the Python snippets on the sheet
+  const CONTROL = new Set(["import","from","as","return","for","in","with","if","else","elif","while","yield","raise","try","except","finally","pass","break","continue"]);
+  const STORAGE = new Set(["def","class","lambda","True","False","None","and","or","not","is","self","super"]);
+  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const tok = /(#.*$)|("[^"]*"|'[^']*')|(@\w+)|(\b\d+(?:\.\d+)?(?:e-?\d+)?\b)|(\b[A-Za-z_]\w*\b)(?=\s*\()|(\b[A-Za-z_]\w*\b)|([^#"'@A-Za-z_0-9]+|.)/gm;
+  const span = (c, t) => `<span class="${c}">${esc(t)}</span>`;
   document.querySelectorAll("pre[data-code]").forEach(pre => {
-    const lines = pre.textContent.split("\n");
-    pre.innerHTML = lines.map((line, i) => {
+    pre.innerHTML = pre.textContent.split("\n").map((line, i) => {
       let out = "";
-      line.replace(tok, (m, cm, st, id, other) => {
-        if (cm) out += `<span class="cm">${esc(cm)}</span>`;
-        else if (st) out += `<span class="st">${esc(st)}</span>`;
-        else if (id) out += KW.has(id) ? `<span class="kw">${id}</span>` : (id === "self" ? `<span class="nb">self</span>` : id);
+      line.replace(tok, (m, cm, st, dec, nu, call, id, other) => {
+        if (cm) out += span("cm", cm);
+        else if (st) out += span("st", st);
+        else if (dec) out += span("fn", dec);
+        else if (nu) out += span("nu", nu);
+        else if (call) out += STORAGE.has(call) ? span("kw2", call) : span(/^[A-Z]/.test(call) ? "ty" : "fn", call);
+        else if (id) out += CONTROL.has(id) ? span("kw", id) : STORAGE.has(id) ? span("kw2", id)
+                          : /^[A-Z][a-z]/.test(id) ? span("ty", id) : span("va", id);
         else out += esc(other);
         return m;
       });
@@ -343,5 +362,6 @@ for epoch in range(E):
     }).join("\n");
   });
 </script>
+
 
 </body></html>

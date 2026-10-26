@@ -12,13 +12,13 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <title>PyTorch Lightning Cheat Sheet (PDF): LightningModule, Trainer, DataModule</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Red+Hat+Mono:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <style>
   @page { size: 297mm 210mm; margin: 0; }
   :root {
-    --accent: #792ee5;
+    --accent: oklch(0.52 0.15 295);
     --accent-soft: #f6b5a5;
-    --accent-bg: #f4eefd;
+    --accent-bg: oklch(0.95 0.02 295);
     --ink: #222;
     --muted: #555;
     --rule: #cfcfcf;
@@ -87,58 +87,71 @@
   footer { position: absolute; left: 7mm; right: 7mm; bottom: 3.2mm; border-top: 0.6pt solid var(--rule); padding-top: 1.2mm; text-align: right; font-size: 6.5pt; color: #444; z-index: 1; }
   footer span + span::before { content: "•"; margin: 0 2.5mm 0 4mm; }
 </style>
-<style id="theme">
-  :root {
-    --accent: #792ee5; --accent-soft: #c9adf5; --accent-bg: #f4eefd; --accent-dark: #5b1fb8;
-    --ink: #1f2430; --muted: #5b6270; --rule: #e3e6ec; --band: #141824;
-    --code-bg: #f6f7fa; --code-fg: #1f2937; --code-cm: #8b94a3; --code-kw: #5b1fb8;
-    --code-st: #b45309; --code-ln: #b9bfca;
-  }
-  body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; padding-top: 0; letter-spacing: -0.05pt; }
-  .band { display: flex; align-items: center; gap: 3.5mm; margin: 0 -7mm; padding: 0 7mm; height: 17mm;
-          background: var(--band); color: #fff; border-bottom: 1.2mm solid var(--accent); width: auto; }
-  .band .logo { width: 10mm; height: 10mm; border-radius: 2.4mm; background: var(--accent); display: grid; place-items: center; flex: none; }
-  .band .logo svg { width: 7mm; height: 7mm; }
-  .band .title { flex: none; }
-  .band h1 { white-space: nowrap; font-weight: 800; font-size: 19pt; letter-spacing: -0.6pt; color: #fff; line-height: 1; }
-  .band .kicker { font-size: 6.4pt; font-weight: 600; letter-spacing: 1.6pt; text-transform: uppercase; color: var(--accent-soft); margin-top: 1.2mm; }
-  .band .kicker { white-space: nowrap; }
-  .band .kicker i { font-style: normal; letter-spacing: .2pt; text-transform: none; color: #c5cad6; font-weight: 400; }
-  .band .steps { margin: 0 0 0 auto; display: flex; gap: 1.6mm; font-size: 7pt; align-items: center; }
-  .band .steps span { background: rgba(255,255,255,.08); border: .5pt solid rgba(255,255,255,.18); border-radius: 4mm; padding: .9mm 2.4mm .9mm 1mm; color: #e9ecf2; }
-  .band .steps span b { background: var(--accent); color: #fff; width: 3.8mm; height: 3.8mm; line-height: 3.8mm; margin-right: 1.3mm; }
-  .band .steps i.arrow { color: var(--accent-soft); font-style: normal; font-size: 7pt; }
-  .grid { margin-top: 3.4mm; height: 176mm; }
-  .col + .col { border-left: none; padding-left: 0; }
-  h2 { font-family: "Inter", sans-serif; font-weight: 750; font-size: 11pt; color: var(--ink); letter-spacing: -0.3pt;
-       display: flex; align-items: center; gap: 1.6mm; margin-bottom: 1.2mm; }
-  h2::before { content: ""; width: 1.4mm; height: 3.6mm; border-radius: .5mm; background: var(--accent); flex: none; }
-  h3 { font-weight: 700; font-size: 6.4pt; letter-spacing: .8pt; color: var(--accent-dark); }
-  pre.code { background: var(--code-bg); color: var(--code-fg); border-radius: 0 1.4mm 1.4mm 0; border-left: 1mm solid var(--accent);
-             font-family: "JetBrains Mono", Menlo, monospace; box-shadow: inset 0 0 0 .4pt #e4e7ee; }
-  pre.code .nb { color: #2563eb; }
+<style>
+  :root { --accent: oklch(0.52 0.15 295); --accent-soft: oklch(0.80 0.06 295); --accent-bg: oklch(0.95 0.02 295); --acc: oklch(0.52 0.15 295); --acc-ink: oklch(0.42 0.13 295); --acc-tint: oklch(0.95 0.02 295);
+          --muted: var(--ink-2); --code-bg: var(--code-paper); --code-fg: var(--ink); --code-cm: var(--ink-3);
+          --code-kw: var(--acc-ink); --code-st: oklch(0.47 0.11 55); --code-ln: var(--ink-3); }
+  html, body { background: var(--paper); }
+  body { font-family: var(--f-body); color: var(--ink); counter-reset: sec; padding-top: 6mm; }
+  header.top { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 3mm 6mm; width: auto; padding-bottom: 2.2mm; }
+  .top .ttl { display: flex; flex-direction: column; gap: 1.2mm; }
+  .top .steps { display: flex; gap: 4.5mm; margin: 0; padding: 0 0 .6mm; list-style: none; font-size: 7.4pt; font-weight: 500; color: var(--ink); }
+  .top .steps li { display: flex; align-items: baseline; gap: 1.2mm; }
+  .top .steps b { font-family: var(--f-mono); font-weight: 600; font-size: 6.6pt; color: var(--acc); }
+  .top .sub { grid-column: 1 / -1; font-size: 6.6pt; color: var(--ink-2); margin-top: -1.4mm; }
+  .grid { margin-top: 3.4mm; height: 168mm; }
+  h2 { color: var(--ink); counter-increment: sec; margin-bottom: 1.1mm; line-height: 1.1; }
+  h2::before { font-variant-numeric: tabular-nums; }
+  h3 { text-transform: uppercase; }
+  p.note { color: var(--ink-2); }
+  pre.code { font-family: var(--f-mono); background: var(--code-bg); color: var(--ink); border-radius: 0;
+             border: .5pt solid var(--rule); box-shadow: none; }
+  pre.code .nb { color: var(--ink); }
   pre.code .kw { font-weight: 600; }
   table.kv td { border-bottom: .4pt solid var(--rule); }
-  table.ft th { color: var(--accent-dark); border-bottom: .7pt solid var(--accent); font-weight: 700; font-size: 5.6pt; }
+  table.ft th { color: var(--acc-ink); border-bottom: .8pt solid var(--ink); }
   table.ft td { border-bottom: .4pt solid var(--rule); }
-  c { font-family: "JetBrains Mono", Menlo, monospace; background: var(--accent-bg); color: #1f2937; }
-  .flow span { background: var(--accent-bg); border-color: var(--accent-soft); border-radius: 3mm; }
-  .flow i { color: var(--accent); }
-  p.note { color: var(--muted); }
-  footer { border-top: .5pt solid var(--rule); display: flex; justify-content: space-between; color: var(--muted); }
+  td.m { color: var(--ink); }
+  c { font-family: var(--f-mono); background: none; padding: 0; color: var(--ink); }
+  .flow span { background: none; border: .5pt solid var(--ink-3); border-radius: 0; font-weight: 500; }
+  .flow i { color: var(--acc); }
+  .hook svg { opacity: .9; }
+  footer { border-top: .6pt solid var(--ink); display: flex; justify-content: space-between; color: var(--ink-2); font-family: var(--f-body); }
   footer span + span::before { content: none; }
   footer b { color: var(--ink); font-weight: 700; }
-  footer .sep { color: var(--accent); margin: 0 1.6mm; }
-</style>
-<style>body { font-size: 6.75pt; } table.kv td { padding: .45mm 0; }</style></head>
+  footer .sep { color: var(--ink-3); margin: 0 1.6mm; }
+
+  :root { --paper: oklch(0.968 0.013 85); --ink: oklch(0.24 0.012 70); --ink-2: oklch(0.42 0.012 70);
+          --ink-3: oklch(0.58 0.012 70); --rule: oklch(0.80 0.014 80); --code-paper: oklch(0.935 0.014 85);
+          --f-display: "Barlow Condensed", sans-serif; --f-body: "Barlow Semi Condensed", sans-serif; --f-mono: "Red Hat Mono", monospace; }
+  header.top { border-bottom: 1.4pt solid var(--ink); }
+  .top .series > i { font-style: normal; text-transform: none; letter-spacing: .2pt; font-weight: 500; color: var(--ink-3); margin-left: 2.2mm; }
+  .top .series { font-family: var(--f-display); font-weight: 600; font-size: 7pt; letter-spacing: 1.4pt; text-transform: uppercase; color: var(--ink-2); }
+  .top .series b { color: var(--acc); font-weight: 700; }
+  .top h1 { font-family: var(--f-display); font-weight: 700; font-size: 27pt; text-transform: uppercase; letter-spacing: .2pt; line-height: .92; }
+  h2 { font-family: var(--f-display); font-weight: 700; font-size: 11.5pt; text-transform: uppercase; letter-spacing: .4pt;
+       border-bottom: .6pt solid var(--ink); padding-bottom: .5mm; }
+  h2::before { content: counter(sec, decimal-leading-zero); color: var(--acc); margin-right: 1.8mm; }
+  h3 { font-family: var(--f-display); font-weight: 600; font-size: 7.6pt; letter-spacing: 1pt; color: var(--acc-ink); }
+  table.kv td, table.ft td { border-bottom: .5pt dotted var(--rule); }
+  .col + .col { border-left: .5pt solid var(--rule); padding-left: 3.6mm; }
+  .top .series > i i { margin: 0; font-family: var(--f-mono); color: var(--ink-2); }
+  /* code: VS Code Dark+ */
+  pre.code { background: #1e1e1e; color: #d4d4d4; border: none; border-radius: .8mm; padding: 1.5mm 2mm 1.5mm 1.2mm; }
+  pre.code .ln { color: #6e7681; }
+  pre.code .cm { color: #6a9955; }
+  pre.code .kw { color: #c586c0; font-weight: 400; }
+  pre.code .kw2 { color: #569cd6; }
+  pre.code .fn { color: #dcdcaa; }
+  pre.code .ty { color: #4ec9b0; }
+  pre.code .st { color: #ce9178; }
+  pre.code .nu { color: #b5cea8; }
+  pre.code .va { color: #9cdcfe; }
+</style></head>
 <body>
 
 <!-- decorative corner: network graph with a bolt -->
-<header class="band">
-  <div class="logo"><svg viewBox="0 0 24 24"><path d="M13 2 L4 13 L10 13 L8 22 L18 9 L12 9 L14 2 Z" fill="#fff"/></svg></div>
-  <div class="title"><h1>PyTorch Lightning</h1><div class="kicker">Cheat Sheet</div></div>
-  <div class="steps"><span><b>1</b>Prepare data</span><i class="arrow">›</i><span><b>2</b>Define LightningModule</span><i class="arrow">›</i><span><b>3</b>Configure Trainer</span><i class="arrow">›</i><span><b>4</b>Fit, test &amp; predict</span></div>
-</header>
+<header class="top"><div class="ttl"><div class="series">AI Cheat Sheet <b>Nº 01</b></div><h1>PyTorch Lightning</h1></div><ol class="steps"><li><b>1</b>Prepare data</li><li><b>2</b>Define LightningModule</li><li><b>3</b>Configure Trainer</li><li><b>4</b>Fit, test &amp; predict</li></ol></header>
 
 <div class="grid">
   <!-- ============ COLUMN 1 ============ -->
@@ -158,19 +171,19 @@
       <h2>LightningModule hooks</h2>
       <div class="two">
         <div>
-          <div class="hook"><svg viewBox="0 0 28 20"><rect x="1" y="3" width="8" height="14" fill="#792ee5"/><rect x="11" y="3" width="6" height="14" fill="#c9adf5"/><rect x="19" y="3" width="8" height="14" fill="#f4eefd"/></svg>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="1" y="3" width="8" height="14" fill="oklch(0.52 0.15 295)"/><rect x="11" y="3" width="6" height="14" fill="oklch(0.80 0.06 295)"/><rect x="19" y="3" width="8" height="14" fill="oklch(0.95 0.02 295)"/></svg>
             <div><b>forward(x)</b>: inference / prediction logic, used by <code>model(x)</code></div></div>
-          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 16 Q10 2 26 4" stroke="#792ee5" stroke-width="2.4" fill="none"/><circle cx="26" cy="4" r="2.5" fill="#792ee5"/></svg>
+          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 16 Q10 2 26 4" stroke="oklch(0.52 0.15 295)" stroke-width="2.4" fill="none"/><circle cx="26" cy="4" r="2.5" fill="oklch(0.52 0.15 295)"/></svg>
             <div><b>training_step(batch, idx)</b>: return the loss; Lightning runs backward &amp; step</div></div>
-          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="2" width="24" height="16" rx="2" fill="#f4eefd" stroke="#792ee5"/><path d="M7 10 l4 4 l9 -9" stroke="#792ee5" stroke-width="2.2" fill="none"/></svg>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="2" width="24" height="16" rx="2" fill="oklch(0.95 0.02 295)" stroke="oklch(0.52 0.15 295)"/><path d="M7 10 l4 4 l9 -9" stroke="oklch(0.52 0.15 295)" stroke-width="2.2" fill="none"/></svg>
             <div><b>validation_step / test_step</b>: compute &amp; <code>self.log</code> metrics, no grads</div></div>
         </div>
         <div>
-          <div class="hook"><svg viewBox="0 0 28 20"><circle cx="8" cy="10" r="6" fill="#c9adf5"/><path d="M14 10 h11 m-4 -4 l4 4 l-4 4" stroke="#792ee5" stroke-width="2.2" fill="none"/></svg>
+          <div class="hook"><svg viewBox="0 0 28 20"><circle cx="8" cy="10" r="6" fill="oklch(0.80 0.06 295)"/><path d="M14 10 h11 m-4 -4 l4 4 l-4 4" stroke="oklch(0.52 0.15 295)" stroke-width="2.2" fill="none"/></svg>
             <div><b>predict_step</b>: what <code>trainer.predict()</code> returns per batch</div></div>
-          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 4 Q8 18 14 12 T26 16" stroke="#792ee5" stroke-width="2.4" fill="none"/><line x1="2" y1="18" x2="26" y2="18" stroke="#bbb"/></svg>
+          <div class="hook"><svg viewBox="0 0 28 20"><path d="M2 4 Q8 18 14 12 T26 16" stroke="oklch(0.52 0.15 295)" stroke-width="2.4" fill="none"/><line x1="2" y1="18" x2="26" y2="18" stroke="#a8a49c"/></svg>
             <div><b>configure_optimizers</b>: return optimizer(s) &amp; LR scheduler(s)</div></div>
-          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="7" width="5" height="6" fill="#792ee5"/><rect x="9" y="7" width="5" height="6" fill="#c9adf5"/><rect x="16" y="7" width="5" height="6" fill="#792ee5"/><rect x="23" y="7" width="3" height="6" fill="#c9adf5"/></svg>
+          <div class="hook"><svg viewBox="0 0 28 20"><rect x="2" y="7" width="5" height="6" fill="oklch(0.52 0.15 295)"/><rect x="9" y="7" width="5" height="6" fill="oklch(0.80 0.06 295)"/><rect x="16" y="7" width="5" height="6" fill="oklch(0.52 0.15 295)"/><rect x="23" y="7" width="3" height="6" fill="oklch(0.80 0.06 295)"/></svg>
             <div><b>on_train_epoch_end</b> and 20+ more hooks to inject logic at any point</div></div>
         </div>
       </div>
@@ -335,17 +348,23 @@ trainer.save_checkpoint("manual.ckpt")</pre>
 <footer><span><b>PyTorch Lightning Cheat Sheet</b><span class="sep">/</span>Lightning 2.x</span><span>github.com/arnabdeypolimi/ai-cheatsheet<span class="sep">/</span>CC BY 4.0<span class="sep">/</span>v1.0 · 10/2026</span></footer>
 
 <script>
-  const KW = new Set(["class","def","return","import","from","as","for","in","with","if","else","True","False","None","super","lambda","and","or","not"]);
-  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  const tok = /(#.*$)|("[^"]*"|'[^']*')|(\b[A-Za-z_]\w*\b)|([^#"'A-Za-z_]+)/gm;
+  // VS Code Dark+ style tokenizer for the Python snippets on the sheet
+  const CONTROL = new Set(["import","from","as","return","for","in","with","if","else","elif","while","yield","raise","try","except","finally","pass","break","continue"]);
+  const STORAGE = new Set(["def","class","lambda","True","False","None","and","or","not","is","self","super"]);
+  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const tok = /(#.*$)|("[^"]*"|'[^']*')|(@\w+)|(\b\d+(?:\.\d+)?(?:e-?\d+)?\b)|(\b[A-Za-z_]\w*\b)(?=\s*\()|(\b[A-Za-z_]\w*\b)|([^#"'@A-Za-z_0-9]+|.)/gm;
+  const span = (c, t) => `<span class="${c}">${esc(t)}</span>`;
   document.querySelectorAll("pre[data-code]").forEach(pre => {
-    const lines = pre.textContent.split("\n");
-    pre.innerHTML = lines.map((line, i) => {
+    pre.innerHTML = pre.textContent.split("\n").map((line, i) => {
       let out = "";
-      line.replace(tok, (m, cm, st, id, other) => {
-        if (cm) out += `<span class="cm">${esc(cm)}</span>`;
-        else if (st) out += `<span class="st">${esc(st)}</span>`;
-        else if (id) out += KW.has(id) ? `<span class="kw">${id}</span>` : (id === "self" ? `<span class="nb">self</span>` : id);
+      line.replace(tok, (m, cm, st, dec, nu, call, id, other) => {
+        if (cm) out += span("cm", cm);
+        else if (st) out += span("st", st);
+        else if (dec) out += span("fn", dec);
+        else if (nu) out += span("nu", nu);
+        else if (call) out += STORAGE.has(call) ? span("kw2", call) : span(/^[A-Z]/.test(call) ? "ty" : "fn", call);
+        else if (id) out += CONTROL.has(id) ? span("kw", id) : STORAGE.has(id) ? span("kw2", id)
+                          : /^[A-Z][a-z]/.test(id) ? span("ty", id) : span("va", id);
         else out += esc(other);
         return m;
       });
@@ -353,5 +372,6 @@ trainer.save_checkpoint("manual.ckpt")</pre>
     }).join("\n");
   });
 </script>
+
 </body>
 </html>

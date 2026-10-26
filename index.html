@@ -11,7 +11,7 @@
 <meta property="og:image" content="https://www.arnabdey.co/ai-cheatsheet/images/llm-finetuning-lora-qlora-pytorch-cheatsheet.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow+Semi+Condensed:wght@400;500;600&family=Red+Hat+Mono:wght@500&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -34,79 +34,96 @@
 }
 </script>
 <style>
-  :root { --bg: #f7f8fb; --card: #fff; --ink: #1f2430; --muted: #5b6270; --rule: #e3e6ec; --band: #141824; }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg: #0f121a; --card: #171b26; --ink: #e8ebf2; --muted: #a2a9b8; --rule: #2a3040; }
+  :root {
+    --paper: oklch(0.968 0.013 85); --ink: oklch(0.24 0.012 70); --ink-2: oklch(0.42 0.012 70);
+    --ink-3: oklch(0.58 0.012 70); --rule: oklch(0.80 0.014 80);
+    --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 48px; --space-2xl: 96px;
   }
-  :root[data-theme="dark"] { --bg: #0f121a; --card: #171b26; --ink: #e8ebf2; --muted: #a2a9b8; --rule: #2a3040; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --paper: oklch(0.20 0.01 70); --ink: oklch(0.93 0.012 85); --ink-2: oklch(0.78 0.012 85); --ink-3: oklch(0.62 0.012 80); --rule: oklch(0.36 0.012 75); }
+  }
+  :root[data-theme="dark"] { --paper: oklch(0.20 0.01 70); --ink: oklch(0.93 0.012 85); --ink-2: oklch(0.78 0.012 85); --ink-3: oklch(0.62 0.012 80); --rule: oklch(0.36 0.012 75); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; }
-  header { background: var(--band); color: #fff; padding: 56px 16px 48px;
-           background-image: linear-gradient(90deg, #792ee5 0 33.3%, #0d9488 33.3% 66.6%, #2563eb 66.6%); background-size: 100% 4px; background-repeat: no-repeat; background-position: bottom; }
-  .wrap { max-width: 1120px; margin: 0 auto; }
-  h1 { font-size: clamp(28px, 5vw, 46px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
-  header p { color: #c5cad6; max-width: 720px; margin-top: 14px; font-size: 17px; }
-  main { padding: 40px 16px 64px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
-  article { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
-  article img { width: 100%; display: block; border-bottom: 1px solid var(--rule); aspect-ratio: 297/210; object-fit: cover; }
-  article .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-  article h2 { font-size: 19px; letter-spacing: -.3px; display: flex; gap: 8px; align-items: center; }
-  article h2::before { content: ""; width: 6px; height: 18px; border-radius: 2px; background: var(--c); flex: none; }
-  article p { color: var(--muted); font-size: 14.5px; flex: 1; }
-  .links { display: flex; gap: 8px; flex-wrap: wrap; }
-  .links a { font-size: 14px; font-weight: 600; text-decoration: none; padding: 7px 14px; border-radius: 8px; border: 1px solid var(--rule); color: var(--ink); }
-  .links a.primary { background: var(--c); border-color: var(--c); color: #fff; }
-  section.about { margin-top: 48px; max-width: 760px; }
-  section.about h2 { font-size: 22px; margin-bottom: 10px; }
-  section.about p { color: var(--muted); margin-bottom: 10px; }
-  footer { border-top: 1px solid var(--rule); padding: 22px 16px; color: var(--muted); font-size: 14px; }
-  a { color: inherit; }
+  body { background: var(--paper); color: var(--ink); font-family: "Barlow Semi Condensed", sans-serif; font-size: 18px; line-height: 1.5; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  header { padding: clamp(40px, 8vw, 96px) 0 var(--space-lg); border-bottom: 2px solid var(--ink); }
+  .series { font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 2.4px; text-transform: uppercase; color: var(--ink-2); }
+  h1 { font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase; font-size: clamp(48px, 9vw, 104px); line-height: .9; letter-spacing: .5px; margin-top: var(--space-sm); }
+  header p { max-width: 62ch; color: var(--ink-2); margin-top: var(--space-md); font-size: 19px; }
+  ol.sheets { list-style: none; }
+  ol.sheets li { display: grid; grid-template-columns: 88px minmax(0, 1fr) minmax(0, 420px); gap: var(--space-lg) var(--space-xl);
+                 padding: var(--space-xl) 0; border-bottom: 1px dotted var(--rule); align-items: start; }
+  .no { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 40px; line-height: 1; color: var(--c); font-variant-numeric: tabular-nums; }
+  h2 { font-family: "Barlow Condensed", sans-serif; font-weight: 700; text-transform: uppercase; font-size: clamp(28px, 3.4vw, 38px); line-height: 1; letter-spacing: .3px; }
+  h2 a { text-decoration: none; color: inherit; }
+  .desc { color: var(--ink-2); margin-top: var(--space-sm); max-width: 52ch; }
+  .meta { font-family: "Red Hat Mono", monospace; font-size: 13px; color: var(--ink-3); margin-top: var(--space-md); }
+  .links { display: flex; gap: var(--space-lg); margin-top: var(--space-md); font-weight: 600; }
+  .links a { color: var(--c); text-decoration: none; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; }
+  .links a:hover { color: var(--ink); }
+  .preview { display: block; border: 1px solid var(--rule); }
+  .preview img { width: 100%; height: auto; display: block; }
+  section.notes { padding: var(--space-xl) 0 var(--space-2xl); display: grid; grid-template-columns: 88px minmax(0, 62ch); gap: var(--space-xl); }
+  section.notes h3 { font-family: "Barlow Condensed", sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-2); padding-top: 4px; }
+  section.notes p + p { margin-top: var(--space-sm); }
+  section.notes a, footer a { color: inherit; }
+  footer { border-top: 2px solid var(--ink); padding: var(--space-md) 0 var(--space-xl); font-size: 15px; color: var(--ink-2); display: flex; justify-content: space-between; gap: var(--space-md); flex-wrap: wrap; }
+  @media (max-width: 860px) {
+    ol.sheets li { grid-template-columns: 1fr; gap: var(--space-md); padding: var(--space-lg) 0; }
+    section.notes { grid-template-columns: 1fr; gap: var(--space-sm); }
+  }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
+<div class="wrap">
+  <header>
+    <div class="series">3 sheets · A4 landscape · free PDF</div>
     <h1>AI Cheat Sheets</h1>
-    <p>Free, printable one-page cheat sheets for PyTorch Lightning, LLM fine-tuning with LoRA and QLoRA, and neural network training, with code, formulas and the flags you actually use.</p>
-  </div>
-</header>
-<main>
-  <div class="wrap">
-    <div class="grid">
-      <article style="--c:#792ee5">
-        <a href="pytorch-lightning-cheatsheet.html"><img src="images/pytorch-lightning-cheatsheet.png" alt="PyTorch Lightning cheat sheet: LightningModule, Trainer, DataModule, callbacks and logging" loading="lazy"></a>
-        <div class="body">
-          <h2>PyTorch Lightning Cheat Sheet</h2>
-          <p>LightningModule hooks, LightningDataModule, Trainer flags, callbacks, logging, checkpoints, multi-GPU training and debugging flags.</p>
-          <div class="links"><a class="primary" href="pdf/pytorch-lightning-cheatsheet.pdf">Download PDF</a><a href="pytorch-lightning-cheatsheet.html">View online</a></div>
-        </div>
-      </article>
-      <article style="--c:#0d9488">
-        <a href="llm-finetuning-lora-qlora-pytorch-cheatsheet.html"><img src="images/llm-finetuning-lora-qlora-pytorch-cheatsheet.png" alt="LLM fine-tuning cheat sheet: tiny GPT, LoRA, QLoRA, PEFT in PyTorch" loading="lazy"></a>
-        <div class="body">
-          <h2>LLM Fine-Tuning Cheat Sheet</h2>
-          <p>Tiny GPT from scratch, pretraining loop, tokenizers, small LLMs, generation, LoRA, QLoRA, PEFT, TRL SFT and GPU memory per parameter.</p>
-          <div class="links"><a class="primary" href="pdf/llm-finetuning-lora-qlora-pytorch-cheatsheet.pdf">Download PDF</a><a href="llm-finetuning-lora-qlora-pytorch-cheatsheet.html">View online</a></div>
-        </div>
-      </article>
-      <article style="--c:#2563eb">
-        <a href="neural-network-training-cheatsheet-numpy-pytorch.html"><img src="images/neural-network-training-cheatsheet-numpy-pytorch.png" alt="Neural network training cheat sheet: activation functions, loss functions, optimizers, metrics with NumPy and PyTorch" loading="lazy"></a>
-        <div class="body">
-          <h2>Neural Network Training Cheat Sheet</h2>
-          <p>Activation functions, loss functions, optimizers (SGD, Adam, AdamW), LR schedules and metrics, each with its formula plus NumPy and PyTorch code. Includes backprop from scratch.</p>
-          <div class="links"><a class="primary" href="pdf/neural-network-training-cheatsheet-numpy-pytorch.pdf">Download PDF</a><a href="neural-network-training-cheatsheet-numpy-pytorch.html">View online</a></div>
-        </div>
-      </article>
-    </div>
+    <p>One-page references for PyTorch Lightning, LLM fine-tuning with LoRA and QLoRA, and neural network training. Each one has working code, the formulas behind it, and the flags you actually use. Print it or keep it open next to your editor.</p>
+  </header>
 
-    <section class="about">
-      <h2>About these cheat sheets</h2>
-      <p>Each sheet fits on a single landscape A4 page, so you can print it or keep it open next to your editor. The code targets PyTorch 2.x, Lightning 2.x and current Hugging Face <code>transformers</code>, <code>peft</code> and <code>trl</code>.</p>
-      <p>Source files, issues and pull requests are on <a href="https://github.com/arnabdeypolimi/ai-cheatsheet">GitHub</a>. Licensed CC BY 4.0, so you're free to share and adapt them with attribution.</p>
-    </section>
-  </div>
-</main>
-<footer><div class="wrap">Made by <a href="https://github.com/arnabdeypolimi">Arnab Dey</a> · <a href="https://github.com/arnabdeypolimi/ai-cheatsheet">github.com/arnabdeypolimi/ai-cheatsheet</a> · CC BY 4.0</div></footer>
+  <ol class="sheets">
+    <li style="--c: oklch(0.52 0.15 295)">
+      <div class="no">01</div>
+      <div>
+        <h2><a href="pytorch-lightning-cheatsheet.html">PyTorch Lightning</a></h2>
+        <p class="desc">LightningModule hooks, LightningDataModule, Trainer flags, callbacks, logging, checkpoints, multi-GPU training and debugging flags.</p>
+        <p class="meta">Lightning 2.x</p>
+        <div class="links"><a href="pdf/pytorch-lightning-cheatsheet.pdf">Download PDF</a><a href="pytorch-lightning-cheatsheet.html">View online</a></div>
+      </div>
+      <a class="preview" href="pytorch-lightning-cheatsheet.html"><img src="images/pytorch-lightning-cheatsheet.png" alt="PyTorch Lightning cheat sheet: LightningModule, Trainer, DataModule, callbacks and logging" loading="lazy" width="1754" height="1240"></a>
+    </li>
+    <li style="--c: oklch(0.52 0.15 180)">
+      <div class="no">02</div>
+      <div>
+        <h2><a href="llm-finetuning-lora-qlora-pytorch-cheatsheet.html">LLMs with PyTorch</a></h2>
+        <p class="desc">A tiny GPT from scratch, pretraining loop, tokenizers, small open models, generation, LoRA, QLoRA, PEFT, TRL SFT and GPU memory per parameter.</p>
+        <p class="meta">PyTorch 2.x · transformers · peft · trl</p>
+        <div class="links"><a href="pdf/llm-finetuning-lora-qlora-pytorch-cheatsheet.pdf">Download PDF</a><a href="llm-finetuning-lora-qlora-pytorch-cheatsheet.html">View online</a></div>
+      </div>
+      <a class="preview" href="llm-finetuning-lora-qlora-pytorch-cheatsheet.html"><img src="images/llm-finetuning-lora-qlora-pytorch-cheatsheet.png" alt="LLM fine-tuning cheat sheet: tiny GPT, LoRA, QLoRA, PEFT in PyTorch" loading="lazy" width="1754" height="1240"></a>
+    </li>
+    <li style="--c: oklch(0.52 0.15 255)">
+      <div class="no">03</div>
+      <div>
+        <h2><a href="neural-network-training-cheatsheet-numpy-pytorch.html">Neural Net Training</a></h2>
+        <p class="desc">Activation functions, loss functions, optimizers, LR schedules and metrics, each with its formula plus NumPy and PyTorch code, and backprop from scratch.</p>
+        <p class="meta">NumPy · PyTorch 2.x · torchmetrics</p>
+        <div class="links"><a href="pdf/neural-network-training-cheatsheet-numpy-pytorch.pdf">Download PDF</a><a href="neural-network-training-cheatsheet-numpy-pytorch.html">View online</a></div>
+      </div>
+      <a class="preview" href="neural-network-training-cheatsheet-numpy-pytorch.html"><img src="images/neural-network-training-cheatsheet-numpy-pytorch.png" alt="Neural network training cheat sheet: activation functions, loss functions, optimizers, metrics with NumPy and PyTorch" loading="lazy" width="1754" height="1240"></a>
+    </li>
+  </ol>
+
+  <section class="notes">
+    <h3>Notes</h3>
+    <div>
+      <p>The code targets PyTorch 2.x, Lightning 2.x and current Hugging Face <code>transformers</code>, <code>peft</code> and <code>trl</code>. Every sheet is a single self-contained HTML file, so you can fix or extend it and print a new PDF.</p>
+      <p>Found a mistake? Open an issue or a pull request on <a href="https://github.com/arnabdeypolimi/ai-cheatsheet">GitHub</a>. Licensed CC BY 4.0.</p>
+    </div>
+  </section>
+
+  <footer><span>Made by <a href="https://github.com/arnabdeypolimi">Arnab Dey</a></span><span>github.com/arnabdeypolimi/ai-cheatsheet · CC BY 4.0 · v1.0</span></footer>
+</div>
 </body>
 </html>
