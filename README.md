@@ -4,11 +4,11 @@ Free, printable, **one-page cheat sheets** for deep learning with **PyTorch**. E
 
 | Cheat sheet | What it covers | Download |
 |---|---|---|
-| **PyTorch Lightning Cheat Sheet** | LightningModule hooks, LightningDataModule, Trainer, callbacks, logging, checkpoints, multi-GPU, debugging flags | [PDF](pdf/pytorch-lightning-cheatsheet.pdf) · [PNG](images/pytorch-lightning-cheatsheet.png) · [Web](https://arnabdeypolimi.github.io/pytorch-cheatsheets/pytorch-lightning-cheatsheet.html) |
-| **LLM Fine-Tuning Cheat Sheet (LoRA, QLoRA)** | Tiny GPT from scratch, pretraining loop, tokenizers, small LLMs, generation, LoRA, QLoRA, PEFT, TRL SFT, GPU memory math | [PDF](pdf/llm-finetuning-lora-qlora-pytorch-cheatsheet.pdf) · [PNG](images/llm-finetuning-lora-qlora-pytorch-cheatsheet.png) · [Web](https://arnabdeypolimi.github.io/pytorch-cheatsheets/llm-finetuning-lora-qlora-pytorch-cheatsheet.html) |
-| **Neural Network Training Cheat Sheet (NumPy & PyTorch)** | Activation functions, loss functions, optimizers, LR schedules, metrics, init and normalization, backprop from scratch | [PDF](pdf/neural-network-training-cheatsheet-numpy-pytorch.pdf) · [PNG](images/neural-network-training-cheatsheet-numpy-pytorch.png) · [Web](https://arnabdeypolimi.github.io/pytorch-cheatsheets/neural-network-training-cheatsheet-numpy-pytorch.html) |
+| **PyTorch Lightning Cheat Sheet** | LightningModule hooks, LightningDataModule, Trainer, callbacks, logging, checkpoints, multi-GPU, debugging flags | [PDF](pdf/pytorch-lightning-cheatsheet.pdf) · [PNG](images/pytorch-lightning-cheatsheet.png) · [Web](https://www.arnabdey.co/pytorch-cheatsheets/pytorch-lightning-cheatsheet.html) |
+| **LLM Fine-Tuning Cheat Sheet (LoRA, QLoRA)** | Tiny GPT from scratch, pretraining loop, tokenizers, small LLMs, generation, LoRA, QLoRA, PEFT, TRL SFT, GPU memory math | [PDF](pdf/llm-finetuning-lora-qlora-pytorch-cheatsheet.pdf) · [PNG](images/llm-finetuning-lora-qlora-pytorch-cheatsheet.png) · [Web](https://www.arnabdey.co/pytorch-cheatsheets/llm-finetuning-lora-qlora-pytorch-cheatsheet.html) |
+| **Neural Network Training Cheat Sheet (NumPy & PyTorch)** | Activation functions, loss functions, optimizers, LR schedules, metrics, init and normalization, backprop from scratch | [PDF](pdf/neural-network-training-cheatsheet-numpy-pytorch.pdf) · [PNG](images/neural-network-training-cheatsheet-numpy-pytorch.png) · [Web](https://www.arnabdey.co/pytorch-cheatsheets/neural-network-training-cheatsheet-numpy-pytorch.html) |
 
-Browse all three online: **https://arnabdeypolimi.github.io/pytorch-cheatsheets/**
+Browse all three online: **https://www.arnabdey.co/pytorch-cheatsheets/**
 
 ---
 
